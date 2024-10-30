@@ -8,7 +8,7 @@ Aplikasi ini menyediakan fitur umpan balik pengguna untuk meningkatkan akurasi d
 
 - **Rekomendasi Berdasarkan Ekspresi Wajah**
 
-    Aplikasi ini mendeteksi ekspresi wajah pengguna untuk menentukan suasana hati mereka (seperti senang, sedih, netral), lalu merekomendasikan musik yang sesuai. Dengan ini, kamu bisa mendapatkan lagu yang relevan dengan suasana hatimu secara otomatis!
+    Aplikasi ini mendeteksi ekspresi wajah pengguna untuk menentukan suasana hati mereka (seperti senang, sedih, marah dan netral), lalu merekomendasikan musik yang sesuai. Dengan ini, kamu bisa mendapatkan lagu yang relevan dengan suasana hatimu secara otomatis!
 
 - **Personalisasi Genre Musik**
 
@@ -34,8 +34,8 @@ Berikut langkah-langkah untuk menjalankan aplikasi dari tahap clone hingga siap 
 
 1. **Clone Repository**
    ```bash
-   git clone https://github.com/username/repo_name.git
-   cd repo_name
+   git clone https://github.com/ExpressCode-Team/MoodSync.git
+   cd MoodSync
 
 2. **Install Dependencies**
     
