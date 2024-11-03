@@ -129,15 +129,26 @@ class _ChooseGenreState extends State<ChooseGenre> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+          padding: EdgeInsets.fromLTRB(
+            MediaQuery.of(context).size.width * 0.06,
+            MediaQuery.of(context).size.height * 0.03,
+            MediaQuery.of(context).size.width * 0.06,
+            0,
+          ),
           child: Center(
             child: Column(
               children: [
-                const Text(
+                Text(
                   'Choose 3 or more genres you like',
                   style: AppTextStyle.headline1,
                 ),

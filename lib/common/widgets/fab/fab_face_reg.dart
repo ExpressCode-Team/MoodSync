@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:mood_sync/core/config/assets/app_vectors.dart';
+import 'package:mood_sync/core/config/assets/app_images.dart';
 import 'package:mood_sync/core/config/theme/app_colors.dart';
 
 class FabFaceReg extends StatelessWidget {
@@ -27,7 +26,7 @@ class FabFaceReg extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: SvgPicture.asset(AppVectors.faceRecog),
+              child: Image.asset(AppImages.faceRecogIcon),
             ),
           ),
         ),

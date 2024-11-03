@@ -18,7 +18,6 @@ class _ResultPageState extends State<ResultPage> {
         child: Column(
           children: [
             Container(
-              margin: const EdgeInsets.only(top: 20, bottom: 10),
               width: 300,
               height: 450,
               color: Colors.grey[200],

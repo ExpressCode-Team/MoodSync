@@ -1,6 +1,6 @@
 # MoodSync 🎶😄
 
-Aplikasi ini adalah platform musik berbasis Flutter yang memberikan rekomendasi lagu secara personal dengan menggabungkan teknologi pengenalan emosi dan machine learning. Menggunakan ekspresi wajah pengguna, aplikasi dapat mendeteksi emosi mereka, seperti senang, sedih, atau netral, dan merekomendasikan lagu yang sesuai dengan suasana hati tersebut. Saat pengguna mendaftar atau login, mereka juga dapat memilih genre favorit untuk semakin mempersonalisasi pengalaman mendengarkan musik.
+Aplikasi ini adalah platform musik berbasis Flutter yang memberikan rekomendasi lagu secara personal dengan menggabungkan teknologi pengenalan emosi dan machine learning. Menggunakan ekspresi wajah pengguna, aplikasi dapat mendeteksi emosi mereka, seperti senang, sedih, marah atau netral, dan merekomendasikan lagu yang sesuai dengan suasana hati tersebut. Saat pengguna mendaftar atau login, mereka juga dapat memilih genre favorit untuk semakin mempersonalisasi pengalaman mendengarkan musik.
 
 Aplikasi ini menyediakan fitur umpan balik pengguna untuk meningkatkan akurasi dan relevansi rekomendasi. Feedback tersebut akan digunakan oleh sistem untuk mengevaluasi dan memperbaiki model rekomendasi, yang dapat diakses melalui dashboard admin. Dengan tampilan antarmuka yang intuitif dan responsif, aplikasi ini memberikan pengalaman musik yang unik dan relevan, yang terintegrasi dengan preferensi dan emosi pengguna secara real-time.
 
@@ -8,7 +8,7 @@ Aplikasi ini menyediakan fitur umpan balik pengguna untuk meningkatkan akurasi d
 
 - **Rekomendasi Berdasarkan Ekspresi Wajah**
 
-    Aplikasi ini mendeteksi ekspresi wajah pengguna untuk menentukan suasana hati mereka (seperti senang, sedih, marah dan netral), lalu merekomendasikan musik yang sesuai. Dengan ini, kamu bisa mendapatkan lagu yang relevan dengan suasana hatimu secara otomatis!
+    Aplikasi ini mendeteksi ekspresi wajah pengguna untuk menentukan suasana hati mereka (seperti senang, sedih, marah atau netral), lalu merekomendasikan musik yang sesuai. Dengan ini, kamu bisa mendapatkan lagu yang relevan dengan suasana hatimu secara otomatis!
 
 - **Personalisasi Genre Musik**
 

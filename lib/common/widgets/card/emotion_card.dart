@@ -1,26 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:mood_sync/core/config/assets/app_images.dart';
+import 'package:mood_sync/core/config/theme/app_colors.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 
 class EmotionCard extends StatelessWidget {
-  const EmotionCard({super.key});
+  final String emotion;
+  const EmotionCard({super.key, required this.emotion});
+
+  String capitalize(String s) {
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1).toLowerCase();
+  }
 
   @override
   Widget build(BuildContext context) {
+    Color backgroundColor;
+    String imageAsset;
+    String emotionState = capitalize(emotion);
+
+    switch (emotion.toLowerCase()) {
+      case 'happy':
+        backgroundColor = const Color.fromARGB(255, 255, 223, 0);
+        imageAsset = AppImages.happyEmot;
+        break;
+      case 'sad':
+        backgroundColor = const Color.fromARGB(255, 40, 40, 255);
+        imageAsset = AppImages.sadEmot;
+        break;
+      case 'anger':
+        backgroundColor = const Color.fromARGB(255, 255, 0, 0);
+        imageAsset = AppImages.angerEmot;
+        break;
+      case 'netral':
+      default:
+        backgroundColor = const Color.fromARGB(255, 128, 128, 128);
+        imageAsset = AppImages.calmEmot;
+        break;
+    }
+
+    double cardHeight = MediaQuery.of(context).size.height * 0.20;
+
     return SizedBox(
-      height: 152,
+      height: cardHeight,
       child: Stack(
         children: [
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: 130,
               width: double.infinity,
               decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 7, 82, 255),
-                  borderRadius: BorderRadius.all(Radius.circular(12))),
-              child: const Padding(
-                padding: EdgeInsets.all(21),
+                color: AppColors.primary, //backgroundColor
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.05,
+                    vertical: 21),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -28,11 +63,11 @@ class EmotionCard extends StatelessWidget {
                       'Your mood \nat the moment',
                       style: AppTextStyle.headline1,
                     ),
-                    SizedBox(
-                      height: 8,
-                    ),
+                    // const SizedBox(
+                    //   height: 8,
+                    // ),
                     Text(
-                      'Netral',
+                      emotionState,
                       style: AppTextStyle.title1,
                     ),
                   ],
@@ -41,12 +76,13 @@ class EmotionCard extends StatelessWidget {
             ),
           ),
           Align(
-            alignment: Alignment.bottomRight,
+            alignment: Alignment.centerRight,
             child: Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Image.asset(AppImages.emotionImg),
+              padding: EdgeInsets.only(
+                  right: MediaQuery.of(context).size.width * 0.10),
+              child: Image.asset(imageAsset),
             ),
-          )
+          ),
         ],
       ),
     );

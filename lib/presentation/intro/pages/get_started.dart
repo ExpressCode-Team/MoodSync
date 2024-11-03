@@ -65,7 +65,7 @@ class GetStartedPage extends StatelessWidget {
                     const SizedBox(
                       height: 16,
                     ),
-                    const Text(
+                    Text(
                       'Connect to a new way of listening—where every song is chosen by your expressions and tuned perfectly to your current vibe.',
                       style: AppTextStyle.bodyText,
                       textAlign: TextAlign.center,

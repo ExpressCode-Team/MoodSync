@@ -4,6 +4,7 @@ import 'package:mood_sync/core/config/theme/app_colors.dart';
 class BottomNavbarApp extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+
   const BottomNavbarApp(
       {super.key, required this.currentIndex, required this.onTap});
 
@@ -20,49 +21,33 @@ class BottomNavbarApp extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           IconButton(
-            icon: const Icon(
-              Icons.menu,
-              color: Colors.white,
+            icon: Icon(
+              Icons.home,
+              color: currentIndex == 0 ? AppColors.primary : Colors.white,
             ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Menu button pressed')),
-              );
-            },
+            onPressed: () => onTap(0),
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.search,
-              color: Colors.white,
+              color: currentIndex == 1 ? AppColors.primary : Colors.white,
             ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Search button pressed')),
-              );
-            },
+            onPressed: () => onTap(1),
           ),
           const SizedBox(width: 48),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.playlist_play,
-              color: Colors.white,
+              color: currentIndex == 2 ? AppColors.primary : Colors.white,
             ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Print button pressed')),
-              );
-            },
+            onPressed: () => onTap(2),
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.person,
-              color: Colors.white,
+              color: currentIndex == 3 ? AppColors.primary : Colors.white,
             ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('People button pressed')),
-              );
-            },
+            onPressed: () => onTap(3),
           ),
         ],
       ),

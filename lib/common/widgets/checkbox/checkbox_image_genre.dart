@@ -28,6 +28,7 @@ class _CheckboxImageGenreState extends State<CheckboxImageGenre> {
 
   @override
   Widget build(BuildContext context) {
+    double imageSize = MediaQuery.of(context).size.width * 0.2;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -43,12 +44,12 @@ class _CheckboxImageGenreState extends State<CheckboxImageGenre> {
               ClipOval(
                 child: Image.network(
                   widget.imageURL,
-                  width: 80,
-                  height: 80,
+                  width: imageSize,
+                  height: imageSize,
                   fit: BoxFit.cover,
                 ),
               ),
-              // const SizedBox(height: 8),
+              SizedBox(height: MediaQuery.of(context).size.width * 0.02),
               Text(
                 widget.description,
                 style: AppTextStyle.headline1,

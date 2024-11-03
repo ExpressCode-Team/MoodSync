@@ -60,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(
                     height: 100,
                   ),
-                  const Text(
+                  Text(
                     'Log in',
                     textAlign: TextAlign.center,
                     style: AppTextStyle.title1,
