@@ -5,6 +5,9 @@ class AppTheme {
   static final darkTheme = ThemeData(
       scaffoldBackgroundColor: AppColors.darkBackground,
       brightness: Brightness.dark,
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: AppColors.primary,
+      ),
       fontFamily: 'Montserrat',
       inputDecorationTheme: InputDecorationTheme(
         filled: true,

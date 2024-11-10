@@ -37,7 +37,7 @@ class BottomNavbarApp extends StatelessWidget {
           const SizedBox(width: 48),
           IconButton(
             icon: Icon(
-              Icons.playlist_play,
+              Icons.analytics,
               color: currentIndex == 2 ? AppColors.primary : Colors.white,
             ),
             onPressed: () => onTap(2),
