@@ -55,7 +55,7 @@ class EmotionCard extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: MediaQuery.of(context).size.width * 0.05,
-                    vertical: 21),
+                    vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
