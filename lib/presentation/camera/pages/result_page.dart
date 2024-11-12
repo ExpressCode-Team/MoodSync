@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 
 class ResultPage extends StatefulWidget {
   final File imageFile;
-  final String result;
-  const ResultPage({super.key, required this.imageFile, required this.result});
+  const ResultPage({super.key, required this.imageFile});
 
   @override
   State<ResultPage> createState() => _ResultPageState();
