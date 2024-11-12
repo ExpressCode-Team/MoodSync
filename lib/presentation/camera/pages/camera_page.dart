@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
-import 'package:mood_sync/controller/sendimage.dart';
 import 'package:mood_sync/presentation/camera/pages/result_page.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -140,12 +139,11 @@ class _CameraPageState extends State<CameraPage> {
                       if (imagePath != null) {
                         // Create a File object from the path and navigate to ResultPage
                         final imageFile = File(imagePath);
-                        var result = Sendimage(imagePath: imagePath).send();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                ResultPage(imageFile: imageFile, result: result),
+                                ResultPage(imageFile: imageFile),
                           ),
                         );
                       }
