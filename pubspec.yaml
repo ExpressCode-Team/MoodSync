@@ -44,6 +44,8 @@ dependencies:
   camerawesome: ^2.1.0
   open_filex: ^4.5.0
   pie_chart: ^5.4.0
+  flutter_bloc: ^8.1.6
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
