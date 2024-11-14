@@ -1,11 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood_sync/common/widgets/button/basic_app_button.dart';
 import 'package:mood_sync/core/config/assets/app_vectors.dart';
 import 'package:mood_sync/core/config/theme/app_colors.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
+import 'package:mood_sync/data/dto/requests/login_dto.dart';
+import 'package:mood_sync/presentation/bloc/bloc/auth_bloc.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,125 +33,147 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: SvgPicture.asset(
-                AppVectors.wave,
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Transform.rotate(
-                angle: 3.14,
+        child: SingleChildScrollView(
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.topRight,
                 child: SvgPicture.asset(
                   AppVectors.wave,
                 ),
               ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 40,
-                horizontal: 40,
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Transform.rotate(
+                  angle: 3.14,
+                  child: SvgPicture.asset(
+                    AppVectors.wave,
+                  ),
+                ),
               ),
-              child: Column(
-                children: [
-                  SvgPicture.asset(
-                    AppVectors.logo,
-                  ),
-                  const SizedBox(
-                    height: 100,
-                  ),
-                  Text(
-                    'Log in',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyle.title1,
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  RichText(
-                    text: TextSpan(
-                        text: 'If You Need Any Support ',
-                        style: AppTextStyle.caption2,
-                        children: <TextSpan>[
-                          TextSpan(
-                              text: 'Click Here',
-                              style: const TextStyle(
-                                color: AppColors.primary,
-                                fontSize: 12,
-                              ),
-                              recognizer: TapGestureRecognizer()..onTap = () {})
-                        ]),
-                  ),
-                  const SizedBox(
-                    height: 32,
-                  ),
-                  _usernameEmailField(context, _username),
-                  const SizedBox(height: 16),
-                  _passwordField(context, _password),
-                  const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: RichText(
-                      text: TextSpan(
-                          text: 'Forgot password?',
-                          style: AppTextStyle.caption1.copyWith(
-                            decoration: TextDecoration.underline,
-                          ),
-                          recognizer: TapGestureRecognizer()..onTap = () {}),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 40,
+                  horizontal: 40,
+                ),
+                child: Column(
+                  children: [
+                    SvgPicture.asset(
+                      AppVectors.logo,
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  BasicAppButton(
-                    onPressed: () {
-                      // print(_usernam.text);
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (BuildContext context) =>
-                      //         const ChooseGenre(),
-                      //   ),
-                      // );
-
-                      // test
-                      // String un = _username.text;
-                      // String pw = _password.text;
-                      // print('Username/email: $un');
-                      // print('password: $pw');
-                      context.go('/choose-genre');
-                    },
-                    title: 'Log In',
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  const SizedBox(height: 32),
-                  Align(
-                    alignment: Alignment.center,
-                    child: RichText(
+                    const SizedBox(
+                      height: 100,
+                    ),
+                    Text(
+                      'Log in',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyle.title1,
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    RichText(
                       text: TextSpan(
-                          text: 'Don\'t Have An Account? ',
-                          style: AppTextStyle.caption1,
+                          text: 'If You Need Any Support ',
+                          style: AppTextStyle.caption2,
                           children: <TextSpan>[
                             TextSpan(
-                                text: 'Register',
-                                style: AppTextStyle.caption1.copyWith(
-                                  decoration: TextDecoration.underline,
-                                  decorationThickness: 2,
-                                  color: AppColors.secondary,
+                                text: 'Click Here',
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 12,
                                 ),
                                 recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    context.go('/register');
-                                  })
+                                  ..onTap = () {})
                           ]),
                     ),
-                  ),
-                ],
-              ),
-            )
-          ],
+                    const SizedBox(
+                      height: 32,
+                    ),
+                    _usernameEmailField(context, _username),
+                    const SizedBox(height: 16),
+                    _passwordField(context, _password),
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: RichText(
+                        text: TextSpan(
+                            text: 'Forgot password?',
+                            style: AppTextStyle.caption1.copyWith(
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()..onTap = () {}),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    BlocConsumer<AuthBloc, AuthState>(
+                      listener: (context, state) {
+                        state.maybeWhen(
+                          orElse: () {},
+                          loginSuccess: (model) {
+                            context.go('/homepage');
+                          },
+                          failure: (message) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(message),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      builder: (context, state) {
+                        return state.maybeWhen(
+                          orElse: () {
+                            return BasicAppButton(
+                              onPressed: () {
+                                context.read<AuthBloc>().add(
+                                      AuthEvent.login(
+                                        LoginDto(
+                                            email: _username.text,
+                                            password: _password.text),
+                                      ),
+                                    );
+                              },
+                              title: 'Log In',
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            );
+                          },
+                          loading: () {
+                            return const CircularProgressIndicator();
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 32),
+                    Align(
+                      alignment: Alignment.center,
+                      child: RichText(
+                        text: TextSpan(
+                            text: 'Don\'t Have An Account? ',
+                            style: AppTextStyle.caption1,
+                            children: <TextSpan>[
+                              TextSpan(
+                                  text: 'Register',
+                                  style: AppTextStyle.caption1.copyWith(
+                                    decoration: TextDecoration.underline,
+                                    decorationThickness: 2,
+                                    color: AppColors.secondary,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      context.go('/register');
+                                    })
+                            ]),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

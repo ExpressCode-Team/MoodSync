@@ -44,6 +44,13 @@ dependencies:
   camerawesome: ^2.1.0
   open_filex: ^4.5.0
   pie_chart: ^5.4.0
+  bloc: ^8.1.4
+  flutter_bloc: ^8.1.6
+  json_annotation: ^4.9.0
+  freezed_annotation: ^2.4.4
+  dartz: ^0.10.1
+  jwt_decoder: ^2.0.1
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +62,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  build_runner: ^2.4.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

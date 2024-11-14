@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mood_sync/common/widgets/card/emotion_card.dart';
 import 'package:mood_sync/core/config/assets/app_vectors.dart';
 import 'package:mood_sync/core/config/theme/app_colors.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
+import 'package:mood_sync/presentation/bloc/bloc/auth_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -55,10 +57,26 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(
                 height: 20,
               ),
-              Text(
-                'Tuned for you',
-                style: AppTextStyle.headline1,
-                textAlign: TextAlign.start,
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  return state.maybeWhen(
+                    orElse: () => Text(
+                      'Tuned for youuuu',
+                      style: AppTextStyle.headline1,
+                      textAlign: TextAlign.start,
+                    ),
+                    loginSuccess: (model) => Text(
+                      model.user!.name.toString(),
+                      style: AppTextStyle.headline1,
+                      textAlign: TextAlign.start,
+                    ),
+                    failure: (message) => Text(
+                      'Tuned for you....',
+                      style: AppTextStyle.headline1,
+                      textAlign: TextAlign.start,
+                    ),
+                  );
+                },
               ),
               const SizedBox(
                 height: 16,
