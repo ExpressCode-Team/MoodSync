@@ -20,11 +20,11 @@ class _ResultPageState extends State<ResultPage> {
             width: 300,
             height: 500,
             color: Colors.grey[200],
-            child: (widget.imageFile != null)
+            child: widget.imageFile.existsSync()
                 ? Image.file(
                     widget.imageFile,
                   )
-                : const SizedBox(),
+                : const Text('failed to load image'),
           ),
         ),
       ),
