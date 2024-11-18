@@ -45,9 +45,10 @@ class _CameraPageState extends State<CameraPage> {
       if (response.statusCode == 200) {
         // Decode JSON response
         Map<String, dynamic> result = jsonDecode(response.body);
+        print("Response JSON: $result");
 
         // Menangani kasus jika tidak ada wajah yang terdeteksi
-        if (result["label"] == "No relevant landmarks detected") {
+        if (result["label"] == "Relevant landmark not detected") {
           throw Exception('No face detected. Please try again.');
         }
 
