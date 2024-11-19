@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mood_sync/presentation/auth/pages/choose_genre.dart';
-import 'package:mood_sync/presentation/auth/pages/login_page.dart';
-import 'package:mood_sync/presentation/auth/pages/register_page.dart';
-import 'package:mood_sync/presentation/camera/pages/camera_page.dart';
-import 'package:mood_sync/presentation/error/pages/error_page.dart';
-import 'package:mood_sync/presentation/home/pages/home_page.dart';
-import 'package:mood_sync/presentation/intro/pages/get_started.dart';
-import 'package:mood_sync/presentation/splash/pages/splash.dart';
+import 'package:mood_sync/presentation/auth/choose_genre.dart';
+import 'package:mood_sync/presentation/auth/login_page.dart';
+import 'package:mood_sync/presentation/auth/register_page.dart';
+import 'package:mood_sync/presentation/camera/camera_page.dart';
+import 'package:mood_sync/presentation/error/error_page.dart';
+import 'package:mood_sync/presentation/home/home_page.dart';
+import 'package:mood_sync/presentation/intro/get_started.dart';
+import 'package:mood_sync/presentation/splash/splash.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
