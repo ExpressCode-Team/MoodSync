@@ -48,6 +48,7 @@ dependencies:
   dartz: ^0.10.1
   flutter_dotenv: ^5.2.1
   flutter_bloc: ^8.1.6
+  spotify_sdk: ^3.0.2
 
 dev_dependencies:
   flutter_test:

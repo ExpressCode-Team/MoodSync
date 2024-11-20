@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood_sync/presentation/auth/choose_genre.dart';
-import 'package:mood_sync/presentation/auth/login_page.dart';
+import 'package:mood_sync/presentation/auth/login_spotify.dart';
 import 'package:mood_sync/presentation/auth/register_page.dart';
 import 'package:mood_sync/presentation/camera/camera_page.dart';
 import 'package:mood_sync/presentation/error/error_page.dart';
@@ -11,7 +11,7 @@ import 'package:mood_sync/presentation/splash/splash.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/homepage',
+    initialLocation: '/signin',
     routes: [
       GoRoute(
         path: '/splash',
@@ -31,7 +31,7 @@ class AppRouter {
         path: '/signin',
         name: 'signin',
         pageBuilder: (context, state) {
-          return const MaterialPage(child: LoginPage());
+          return const MaterialPage(child: LoginSpotify());
         },
       ),
       GoRoute(
