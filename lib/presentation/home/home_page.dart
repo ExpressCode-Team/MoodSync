@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood_sync/common/widgets/fab/fab_face_reg.dart';
 import 'package:mood_sync/common/widgets/navbar/bottom_navbar_app.dart';
-import 'package:mood_sync/presentation/homescreen/pages/home_screen.dart';
-import 'package:mood_sync/presentation/profile/pages/profile_screen.dart';
-import 'package:mood_sync/presentation/searchscreen/pages/search_screen.dart';
-import 'package:mood_sync/presentation/statistik/statistics/statistics_screen.dart';
+import 'package:mood_sync/presentation/homescreen/home_screen.dart';
+import 'package:mood_sync/presentation/profile/profile_screen.dart';
+import 'package:mood_sync/presentation/searchscreen/search_screen.dart';
+import 'package:mood_sync/presentation/statistik/statistics_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
