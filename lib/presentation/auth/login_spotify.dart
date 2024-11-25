@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:mood_sync/core/config/env/env_config.dart';
 import 'package:mood_sync/presentation/auth/choose_genre.dart';
 import 'package:spotify_sdk/spotify_sdk.dart';
 
@@ -89,17 +90,14 @@ class _LoginSpotifyState extends State<LoginSpotify> {
   Future<void> getAccessToken() async {
     try {
       var authenticationToken = await SpotifySdk.getAccessToken(
-        clientId: 'e7c14753755f4e5fb395af3f8e2eb583',
-        redirectUrl: 'moodsync://auth',
-        scope: 'app-remote-control, '
-            'user-read-playback-state, '
-            'user-modify-playback-state, '
-            'user-read-currently-playing',
+        clientId: EnvConfig.CLIENT_ID,
+        redirectUrl: EnvConfig.REDIRECT_URI,
+        scope: EnvConfig.SPOTIFY_GLOBAL_SCOPE,
       );
       setState(() {
         _accessToken = authenticationToken;
       });
-      print(authenticationToken);
+      // print(authenticationToken);
     } on PlatformException catch (e) {
       setState(() {
         _accessToken = '$e.code: ${e.message}';

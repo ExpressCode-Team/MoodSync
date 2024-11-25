@@ -109,52 +109,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 },
               ),
-              // Expanded(
-              //   child: GridView.builder(
-              //     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              //       crossAxisCount: 2,
-              //       crossAxisSpacing: 16,
-              //       mainAxisSpacing: 16,
-              //       childAspectRatio: 3 / 4,
-              //     ),
-              //     itemCount: 4,
-              //     itemBuilder: (context, index) {
-              //       // Data statis sementara
-              //       final songData = [
-              //         {
-              //           'title': 'Levitating',
-              //           'artist': 'Dua Lipa',
-              //           'image':
-              //               'https://cdns-images.dzcdn.net/images/cover/fb067a7f369363fb6e98470cf10e5fb5/0x1900-000000-80-0-0.jpg'
-              //         },
-              //         {
-              //           'title': 'APT',
-              //           'artist': 'Rose',
-              //           'image':
-              //               'https://cdns-images.dzcdn.net/images/cover/fb067a7f369363fb6e98470cf10e5fb5/0x1900-000000-80-0-0.jpg'
-              //         },
-              //         {
-              //           'title': 'Levitating',
-              //           'artist': 'Dua Lipa',
-              //           'image':
-              //               'https://cdns-images.dzcdn.net/images/cover/fb067a7f369363fb6e98470cf10e5fb5/0x1900-000000-80-0-0.jpg'
-              //         },
-              //         {
-              //           'title': 'APT',
-              //           'artist': 'Rose',
-              //           'image':
-              //               'https://cdns-images.dzcdn.net/images/cover/fb067a7f369363fb6e98470cf10e5fb5/0x1900-000000-80-0-0.jpg'
-              //         },
-              //       ][index];
-
-              //       return SongCard(
-              //         title: songData['title']!,
-              //         artist: songData['artist']!,
-              //         imageUrl: songData['image']!,
-              //       );
-              //     },
-              //   ),
-              // ),
             ],
           ),
         ),

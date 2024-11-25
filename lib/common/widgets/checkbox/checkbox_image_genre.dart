@@ -6,12 +6,14 @@ class CheckboxImageGenre extends StatefulWidget {
   final String description;
   final bool initialCheck;
   final Function(bool) onChanged;
-  const CheckboxImageGenre(
-      {super.key,
-      required this.imageURL,
-      required this.description,
-      required this.initialCheck,
-      required this.onChanged});
+
+  const CheckboxImageGenre({
+    super.key,
+    required this.imageURL,
+    required this.description,
+    required this.initialCheck,
+    required this.onChanged,
+  });
 
   @override
   State<CheckboxImageGenre> createState() => _CheckboxImageGenreState();
@@ -29,6 +31,7 @@ class _CheckboxImageGenreState extends State<CheckboxImageGenre> {
   @override
   Widget build(BuildContext context) {
     double imageSize = MediaQuery.of(context).size.width * 0.2;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -40,6 +43,8 @@ class _CheckboxImageGenreState extends State<CheckboxImageGenre> {
         alignment: Alignment.center,
         children: [
           Column(
+            mainAxisSize:
+                MainAxisSize.min, // Prevent overflow by keeping size minimal
             children: [
               ClipOval(
                 child: Image.network(
@@ -50,10 +55,16 @@ class _CheckboxImageGenreState extends State<CheckboxImageGenre> {
                 ),
               ),
               SizedBox(height: MediaQuery.of(context).size.width * 0.02),
-              Text(
-                widget.description,
-                style: AppTextStyle.headline1,
-                textAlign: TextAlign.center,
+              // Wrap the text with a Flexible widget to avoid overflow
+              Flexible(
+                child: Text(
+                  widget.description,
+                  style: AppTextStyle.headline1,
+                  textAlign: TextAlign.center,
+                  overflow:
+                      TextOverflow.ellipsis, // Handle text overflow gracefully
+                  maxLines: 2, // Limit the number of lines for the text
+                ),
               ),
             ],
           ),

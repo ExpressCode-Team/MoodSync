@@ -37,19 +37,19 @@ class ProfileScreen extends StatelessWidget {
                             radius: 60,
                             backgroundImage: AssetImage(AppImages.happyEmot),
                           ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Colors.white,
-                              child: Icon(
-                                Icons.edit,
-                                size: 18,
-                                color: Colors.black,
-                              ),
-                            ),
-                          )
+                          // Positioned(
+                          //   bottom: 0,
+                          //   right: 0,
+                          //   child: CircleAvatar(
+                          //     radius: 16,
+                          //     backgroundColor: Colors.white,
+                          //     child: Icon(
+                          //       Icons.edit,
+                          //       size: 18,
+                          //       color: Colors.black,
+                          //     ),
+                          //   ),
+                          // )
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -57,7 +57,7 @@ class ProfileScreen extends StatelessWidget {
                         'User',
                         style: AppTextStyle.title1,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 12),
                       Padding(
                         padding: EdgeInsets.all(
                             MediaQuery.of(context).size.width * 0.08),
