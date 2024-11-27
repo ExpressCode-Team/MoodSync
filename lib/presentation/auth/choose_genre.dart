@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:mood_sync/common/widgets/checkbox/checkbox_image_genre.dart';
 import 'package:mood_sync/common/widgets/input/search_text_field.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ChooseGenre extends StatefulWidget {
@@ -120,10 +121,12 @@ class _ChooseGenreState extends State<ChooseGenre> {
       }
     }
 
-    await _secureStorage.write(
-      key: 'selectedGenres',
-      value: json.encode(checkedGenres),
-    );
+    // await _secureStorage.write(
+    //   key: 'selectedGenres',
+    //   value: json.encode(checkedGenres),
+    // );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selectedGenres', json.encode(checkedGenres));
 
     print('Genre yang dicentang: $checkedGenres');
     context.go('/homepage');

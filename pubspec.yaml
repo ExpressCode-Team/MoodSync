@@ -51,6 +51,7 @@ dependencies:
   spotify_sdk: ^3.0.2
   flutter_secure_storage: ^4.2.1
   shimmer: ^3.0.0
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:

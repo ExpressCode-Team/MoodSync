@@ -6,6 +6,7 @@ import 'package:mood_sync/presentation/auth/register_page.dart';
 import 'package:mood_sync/presentation/camera/camera_page.dart';
 import 'package:mood_sync/presentation/error/error_page.dart';
 import 'package:mood_sync/presentation/home/home_page.dart';
+import 'package:mood_sync/presentation/homescreen/playlist_detail_screen.dart';
 import 'package:mood_sync/presentation/intro/get_started.dart';
 import 'package:mood_sync/presentation/splash/splash.dart';
 
@@ -53,6 +54,13 @@ class AppRouter {
         name: 'homepage',
         pageBuilder: (context, state) {
           return const MaterialPage(child: HomePage());
+        },
+      ),
+      GoRoute(
+        path: '/playlist/:playlistId', // :playlistId adalah parameter dinamis
+        builder: (context, state) {
+          final playlistId = state.pathParameters['playlistId']!;
+          return PlaylistDetailScreen(playlistId: playlistId);
         },
       ),
       GoRoute(
