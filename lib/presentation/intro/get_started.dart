@@ -116,7 +116,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
         _accessToken = authenticationToken;
       });
       print('access_token $authenticationToken');
-      context.go('/homepage');
+      context.go('/choose-genre');
     } on PlatformException catch (e) {
       setState(() {
         _accessToken = '$e.code: ${e.message}';

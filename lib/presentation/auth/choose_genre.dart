@@ -1,14 +1,71 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 import 'package:mood_sync/common/widgets/checkbox/checkbox_image_genre.dart';
 import 'package:mood_sync/common/widgets/input/search_text_field.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shimmer/shimmer.dart';
+
+// Static genres list
+final List<String> staticGenres = [
+  'Pop',
+  'Rock',
+  'Hip-Hop',
+  'R&B',
+  'Jazz',
+  'Classical',
+  'Indie',
+  'Dangdut',
+  'Latin',
+  'Dance/Electronic',
+  'Reggaeton',
+  'EDM',
+  'Blues',
+  'Punk',
+  'Alternative',
+  'Soul',
+  'Folk',
+  'World Music',
+  'Metal',
+  'Country',
+  'Ambient',
+  'K-Pop',
+  'Afrobeats',
+  'Trap',
+  'Indie Pop',
+  'Lo-Fi Beats',
+  'Bossa Nova',
+  'Reggae',
+  'Jazz Funk',
+  'Ska',
+  'Techno',
+  'House',
+  'Pop Rock',
+  'Funk',
+  'Gospel',
+  'Bluegrass',
+  'Dubstep',
+  'Karaoke',
+  'Disco',
+  'Salsa',
+  'Bhangra',
+  'Tango',
+  'Psychedelic',
+  'Samba',
+  'Folk Rock',
+  'Grunge',
+  'Alt Rock',
+  'Experimental',
+  'Folk Pop',
+  'Celtic',
+  'Hard Rock',
+  'Electronic Rock',
+  'Trap Music',
+  'Glitch Hop',
+  'Chillwave',
+  'Industrial'
+];
 
 class ChooseGenre extends StatefulWidget {
   const ChooseGenre({super.key});
@@ -18,113 +75,45 @@ class ChooseGenre extends StatefulWidget {
 }
 
 class _ChooseGenreState extends State<ChooseGenre> {
-  List<bool> isChecked = List.generate(150, (index) => false);
+  // Menggunakan Map untuk menyimpan status checkbox berdasarkan genre
+  Map<String, bool> genreCheckedMap = {};
 
-  List<Map<String, dynamic>> genreData = [];
+  // Menyimpan data genre yang telah difilter
+  List<String> filteredGenreData = staticGenres;
 
-  // to temporarily save filter result
-  List<Map<String, dynamic>> filteredGenreData = [];
-
-  // text controller for search
   final TextEditingController _searchController = TextEditingController();
-
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-
-  bool _isLoading = true;
 
   @override
   void initState() {
-    print("Masuk ke choose_genre");
     super.initState();
-    // filteredGenreData = genreData;
-    _loadGenres();
     _searchController.addListener(_filterGenres);
-  }
 
-  // Ambil access token dan data genre dari Spotify
-  Future<void> _loadGenres() async {
-    // Simpan waktu mulai loading
-    final startLoading = DateTime.now();
-
-    // Ambil access token dari secure storage
-    String? accessToken = await _secureStorage.read(key: 'accessToken');
-
-    if (accessToken == null) {
-      print("Access token tidak ditemukan!");
-      return;
-    } else {
-      print("Access token ditemukan: $accessToken");
-    }
-
-    final elapsed = DateTime.now().difference(startLoading);
-    final remainingTime = const Duration(seconds: 2) - elapsed;
-
-    // Jika belum 2 detik, tunggu waktu sisa
-    if (remainingTime > Duration.zero) {
-      await Future.delayed(remainingTime);
-    }
-
-    // Request ke API Spotify untuk mendapatkan genre
-    final response = await http.get(
-      Uri.parse(
-          'https://api.spotify.com/v1/recommendations/available-genre-seeds'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      // Parsing response dari Spotify
-      var data = json.decode(response.body);
-
-      // Pastikan Anda mengambil key yang benar sesuai dengan struktur response
-      print("hasil data dari api: $data");
-      var categories = data['genres']; // Mengambil langsung genres
-
-      if (categories != null) {
-        setState(() {
-          genreData = categories
-              .map<Map<String, dynamic>>((genre) => {
-                    'imageUrl':
-                        'https://avatar.iran.liara.run/username?username=$genre', // URL gambar
-                    'description':
-                        genre // Nama genre ditempatkan di 'description'
-                  })
-              .toList();
-          filteredGenreData = genreData;
-          _isLoading = false;
-        });
-      } else {
-        print('Genres tidak ditemukan dalam response API!');
-      }
-    } else {
-      print('Gagal memuat genre: ${response.statusCode}');
+    // Menginisialisasi map dengan status checkbox untuk setiap genre
+    for (var genre in staticGenres) {
+      genreCheckedMap[genre] = false;
     }
   }
 
+  // Memfilter genre berdasarkan pencarian
   void _filterGenres() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      filteredGenreData = genreData
-          .where((genre) => genre['description']!.toLowerCase().contains(query))
+      filteredGenreData = staticGenres
+          .where((genre) => genre.toLowerCase().contains(query))
           .toList();
     });
   }
 
-  int get selectedCount => isChecked.where((checked) => checked).length;
+  int get selectedCount =>
+      genreCheckedMap.values.where((checked) => checked).length;
 
   Future<void> submitCheckedValues() async {
-    List<String> checkedGenres = [];
-    for (var i = 0; i < isChecked.length; i++) {
-      if (isChecked[i]) {
-        checkedGenres.add(genreData[i]['description']!);
-      }
-    }
+    // Ambil genre yang dipilih berdasarkan Map
+    List<String> checkedGenres = genreCheckedMap.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
 
-    // await _secureStorage.write(
-    //   key: 'selectedGenres',
-    //   value: json.encode(checkedGenres),
-    // );
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selectedGenres', json.encode(checkedGenres));
 
@@ -160,7 +149,7 @@ class _ChooseGenreState extends State<ChooseGenre> {
                 SearchTextField(controller: _searchController),
                 const SizedBox(height: 24),
                 Expanded(
-                  child: _isLoading ? _buildShimmerGrid() : _buildGenreGrid(),
+                  child: _buildGenreGrid(),
                 ),
               ],
             ),
@@ -170,97 +159,54 @@ class _ChooseGenreState extends State<ChooseGenre> {
     );
   }
 
-  Widget _buildShimmerGrid() {
-    return GridView.builder(
-      itemCount: 15, // Placeholder dengan jumlah item sementara
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 24,
-        crossAxisSpacing: 16,
-      ),
-      itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: Colors.grey[400]!,
-          highlightColor: Colors.grey[200]!,
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // Sesuaikan dengan widget asli
-            children: [
-              ClipOval(
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.2,
-                  height: MediaQuery.of(context).size.width * 0.2,
-                  color: Colors.grey[400], // Placeholder untuk gambar
-                ),
-              ),
-              SizedBox(height: MediaQuery.of(context).size.width * 0.02),
-              Flexible(
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.15,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[400], // Placeholder untuk teks
-                    borderRadius:
-                        BorderRadius.circular(15), // Membuat rounded corners
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildGenreGrid() {
-    return Stack(children: [
-      ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        child: GridView.builder(
+    return Stack(
+      children: [
+        GridView.builder(
           itemCount: filteredGenreData.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             mainAxisSpacing: 24,
           ),
           itemBuilder: (context, index) {
+            String genre = filteredGenreData[index];
             return CheckboxImageGenre(
-              imageURL: filteredGenreData[index]['imageUrl']!,
-              description: filteredGenreData[index]['description']!,
-              initialCheck: isChecked[index],
+              imageURL: '', // Tidak ada gambar, kosongkan
+              description: genre,
+              initialCheck: genreCheckedMap[genre] ?? false,
               onChanged: (bool checked) {
                 setState(() {
-                  isChecked[index] = checked;
+                  genreCheckedMap[genre] = checked;
                 });
               },
             );
           },
         ),
-      ),
-      if (selectedCount >= 3)
-        Positioned(
-          bottom: 16,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: ElevatedButton(
-              onPressed: () {
-                submitCheckedValues();
-              },
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 21, horizontal: 36),
-                backgroundColor: Colors.white,
-              ),
-              child: const Text(
-                'Done',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+        if (selectedCount >= 3)
+          Positioned(
+            bottom: 16,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: ElevatedButton(
+                onPressed: submitCheckedValues,
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 21, horizontal: 36),
+                  backgroundColor: Colors.white,
+                ),
+                child: const Text(
+                  'Done',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-    ]);
+      ],
+    );
   }
 }

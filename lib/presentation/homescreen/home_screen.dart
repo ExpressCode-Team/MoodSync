@@ -52,6 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
     String? accessToken = await _secureStorage.read(key: 'accessToken');
     if (accessToken == null) {
       print("Access token tidak ditemukan!");
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
@@ -79,46 +82,134 @@ class _HomeScreenState extends State<HomeScreen> {
           _isLoading = false;
         });
       } else {
+        setState(() {
+          _isLoading = false;
+        });
         print('Gagal memuat track: ${response.statusCode}');
       }
     } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
       print('Error: $e');
     }
   }
 
+  // Future<void> _fetchPlaylists() async {
+  //   String? accessToken = await _secureStorage.read(key: 'accessToken');
+  //   if (accessToken == null) {
+  //     print("Access token tidak ditemukan!");
+  //     return;
+  //   }
+
+  //   try {
+  //     final response = await http.get(
+  //       Uri.parse('https://api.spotify.com/v1/browse/featured-playlists'),
+  //       headers: {'Authorization': 'Bearer $accessToken'},
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       var data = json.decode(response.body);
+  //       var playlists = data['playlists']['items'];
+
+  //       setState(() {
+  //         playlistData = playlists
+  //             .map<Map<String, dynamic>>((playlist) => {
+  //                   'name': playlist['name'],
+  //                   'id': playlist['id'],
+  //                   'description': playlist['description'],
+  //                   'image': playlist['images'][0]['url'],
+  //                   'url': playlist['external_urls']['spotify'],
+  //                 })
+  //             .toList();
+  //       });
+  //     } else {
+  //       print('Gagal memuat playlist: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     print('Error: $e');
+  //   }
+  // }
+
   Future<void> _fetchPlaylists() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? genresJson = prefs.getString('selectedGenres');
+    List<String> genresList;
+
+    if (genresJson != null) {
+      genresList = List<String>.from(json.decode(genresJson));
+    } else {
+      genresList = ['pop']; // Default genre
+    }
+
     String? accessToken = await _secureStorage.read(key: 'accessToken');
     if (accessToken == null) {
       print("Access token tidak ditemukan!");
       return;
     }
 
+    List<Map<String, dynamic>> fetchedPlaylists = [];
+
     try {
-      final response = await http.get(
-        Uri.parse('https://api.spotify.com/v1/browse/featured-playlists'),
-        headers: {'Authorization': 'Bearer $accessToken'},
-      );
+      // Ambil satu playlist untuk setiap genre
+      for (String genre in genresList) {
+        final response = await http.get(
+          Uri.parse(
+              'https://api.spotify.com/v1/search?q=genre%3A$genre&type=playlist&include_external=audio'),
+          headers: {'Authorization': 'Bearer $accessToken'},
+        );
 
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-        var playlists = data['playlists']['items'];
+        if (response.statusCode == 200) {
+          var data = json.decode(response.body);
 
-        setState(() {
-          playlistData = playlists
-              .map<Map<String, dynamic>>((playlist) => {
-                    'name': playlist['name'],
-                    'id': playlist['id'],
-                    'description': playlist['description'],
-                    'image': playlist['images'][0]['url'],
-                    'url': playlist['external_urls']['spotify'],
-                  })
-              .toList();
-        });
-      } else {
-        print('Gagal memuat playlist: ${response.statusCode}');
+          // Pastikan data 'playlists' dan 'items' ada di respons
+          if (data.containsKey('playlists') &&
+              data['playlists']['items'] != null) {
+            var playlists = data['playlists']['items'];
+
+            // Ambil hanya satu playlist untuk setiap genre
+            if (playlists.isNotEmpty) {
+              var playlist = playlists[0]; // Ambil hanya playlist pertama
+              fetchedPlaylists.add({
+                'name': playlist['name'] ?? 'No title',
+                'id': playlist['id'],
+                'description':
+                    playlist['description'] ?? 'No description available',
+                'image': (playlist['images'] != null &&
+                        playlist['images'].isNotEmpty &&
+                        playlist['images'][0]['url'] != null)
+                    ? playlist['images'][0]['url']
+                    : null, // Handle image URL if it's available
+                'url': playlist['external_urls']['spotify'] ??
+                    '', // Ensure URL exists
+              });
+            } else {
+              print('No playlists found for genre $genre.');
+            }
+          } else {
+            print('Playlist data kosong atau tidak valid untuk genre $genre.');
+          }
+        } else {
+          print(
+              'Gagal memuat playlist untuk genre $genre: ${response.statusCode}');
+          // Jika status code bukan 200, tampilkan pesan error
+          setState(() {
+            playlistData = [];
+          });
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Gagal memuat playlist untuk genre $genre')));
+          return; // Menghentikan proses jika ada error
+        }
       }
+
+      // Update UI dengan playlist yang berhasil diambil
+      setState(() {
+        playlistData = fetchedPlaylists;
+      });
     } catch (e) {
       print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Terjadi kesalahan saat memuat playlist.')));
     }
   }
 
@@ -149,17 +240,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 AppVectors.logo,
                 height: AppBar().preferredSize.height * 0.7,
               ),
-              // IconButton(
-              //   onPressed: () {
-              //     ScaffoldMessenger.of(context).showSnackBar(
-              //       const SnackBar(content: Text('This is settings button')),
-              //     );
-              //   },
-              //   icon: const Icon(
-              //     Icons.more_vert,
-              //     color: Colors.white,
-              //   ),
-              // ),
             ],
           ),
         ),
@@ -178,11 +258,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 20),
                   Text('Tuned for you', style: AppTextStyle.headline1),
                   const SizedBox(height: 12),
-                  _isLoading ? _buildShimmerCards() : _buildTrackCards(context),
+                  _isLoading
+                      ? _buildShimmerCards()
+                      : trackData.isEmpty
+                          ? const Center(
+                              child: Text('Unsuccessful in obtaining data'))
+                          : _buildTrackCards(context),
                   const SizedBox(height: 20),
                   Text('Playlist for you', style: AppTextStyle.headline1),
                   const SizedBox(height: 12),
-                  _buildPlaylistCards(context),
+                  _isLoading
+                      ? _buildShimmerCards()
+                      : playlistData.isEmpty
+                          ? const Center(
+                              child: Text('Unsuccessful in obtaining data'))
+                          : _buildPlaylistCards(context),
                 ],
               ),
             ),
@@ -213,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisSpacing: 16,
         childAspectRatio: 3 / 4,
       ),
-      itemCount: 4,
+      itemCount: 2,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.shade700,
