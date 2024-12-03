@@ -146,6 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (accessToken == null) {
       print("Access token tidak ditemukan!");
       return;
+    } else {
+      print('Access token: $accessToken');
     }
 
     List<Map<String, dynamic>> fetchedPlaylists = [];
@@ -191,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         } else {
           print(
-              'Gagal memuat playlist untuk genre $genre: ${response.statusCode}');
+              'Gagal memuat playlist untuk genre $genre: ${response.statusCode}, body: ${response.body}');
           // Jika status code bukan 200, tampilkan pesan error
           setState(() {
             playlistData = [];

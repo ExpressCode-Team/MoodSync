@@ -1,9 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:go_router/go_router.dart';
+import 'package:mood_sync/core/config/assets/app_images.dart';
+import 'package:mood_sync/core/config/theme/app_text_style.dart';
 import 'package:path_provider/path_provider.dart';
 
 class CameraPage extends StatefulWidget {
@@ -18,62 +20,113 @@ class _CameraPageState extends State<CameraPage> {
   // URL API
   final String apiUrl = "https://facialexpress.raihanproject.my.id/predict/ml/";
 
-  Future<Map<String, dynamic>> _sendImageToApi(File imageFile) async {
-    // Simulasi pengiriman data ke API dengan data dummy
-    // await Future.delayed(const Duration(seconds: 2)); // Simulasi loading API
+  // Simulasi request API untuk mendapatkan emosi
+  Future<Map<String, dynamic>> _simulateEmotionRequest() async {
+    await Future.delayed(const Duration(seconds: 2)); // Simulasi delay request
 
-    // Hasil dummy (random predicted value antara 1-4)
-    // int predicted = Random().nextInt(4) + 1; // Nilai antara 1-4
-    // return {"predicted": predicted};
+    // Simulasi hasil response dari API
+    List<String> emotions = ["happy", "sad", "angry", "neutral"];
+    String simulatedEmotion = emotions[
+        (emotions.length * (DateTime.now().millisecondsSinceEpoch % 100) / 100)
+            .floor()];
 
-    // aseli
-    try {
-      // Membuat request multipart
-      var request = http.MultipartRequest('POST', Uri.parse(apiUrl))
-        ..files.add(await http.MultipartFile.fromPath(
-          'file', // Nama field yang diterima API
-          imageFile.path,
-        ));
+    // Simulasi prediksi
+    List<int> predictions = [
+      1,
+      2,
+      3
+    ]; // Misalnya prediksi ini adalah ID untuk suatu emosi
 
-      // Menambahkan header 'Accept' untuk menerima JSON
-      request.headers.addAll({'Accept': 'application/json'});
-
-      // Kirim permintaan dan tunggu respons
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode == 200) {
-        // Decode JSON response
-        Map<String, dynamic> result = jsonDecode(response.body);
-        print("Response JSON: $result");
-
-        // Menangani kasus jika tidak ada wajah yang terdeteksi
-        if (result["label"] == "Relevant landmark not detected") {
-          throw Exception('No face detected. Please try again.');
-        }
-
-        // Parsing the string list to actual integer list
-        List<int> predictions = List<int>.from(jsonDecode(result["predict"]));
-
-        return {
-          "predict": predictions,
-          "label": result["label"], // Menyimpan label emosi yang diterima
-        };
-      } else {
-        throw Exception('Failed to connect: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Error sending image to API: $e');
-    }
+    return {
+      "predict": predictions,
+      "label": simulatedEmotion, // Label emosi yang diterima
+    };
   }
 
+  Future<Map<String, dynamic>> _sendImageToApi(File imageFile) async {
+    // Simulasi pengiriman data ke API dengan data dummy
+    await Future.delayed(const Duration(seconds: 1)); // Simulasi loading API
+
+    // Hasil dummy (random predicted value antara 1-4)
+    int predicted = Random().nextInt(4) + 1; // Nilai antara 1-4
+    return {"predicted": predicted};
+
+    // aseli
+    // try {
+    //   // Membuat request multipart
+    //   var request = http.MultipartRequest('POST', Uri.parse(apiUrl))
+    //     ..files.add(await http.MultipartFile.fromPath(
+    //       'file', // Nama field yang diterima API
+    //       imageFile.path,
+    //     ));
+
+    //   // Menambahkan header 'Accept' untuk menerima JSON
+    //   request.headers.addAll({'Accept': 'application/json'});
+
+    //   // Kirim permintaan dan tunggu respons
+    //   var streamedResponse = await request.send();
+    //   var response = await http.Response.fromStream(streamedResponse);
+
+    //   if (response.statusCode == 200) {
+    //     // Decode JSON response
+    //     Map<String, dynamic> result = jsonDecode(response.body);
+    //     print("Response JSON: $result");
+
+    //     // Menangani kasus jika tidak ada wajah yang terdeteksi
+    //     if (result["label"] == "Relevant landmark not detected") {
+    //       throw Exception('No face detected. Please try again.');
+    //     }
+
+    //     // Parsing the string list to actual integer list
+    //     List<int> predictions = List<int>.from(jsonDecode(result["predict"]));
+
+    //     return {
+    //       "predict": predictions,
+    //       "label": result["label"], // Menyimpan label emosi yang diterima
+    //     };
+    //   } else {
+    //     throw Exception('Failed to connect: ${response.statusCode}');
+    //   }
+    // } catch (e) {
+    //   throw Exception('Error sending image to API: $e');
+    // }
+  }
+
+  // aseli
+  // Future<void> _onCapture(File imageFile) async {
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+
+  //   try {
+  //     final result = await _sendImageToApi(imageFile);
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+
+  //     // Menampilkan hasil API
+  //     print(result);
+  //     _showEmotionResult(result["label"]); // Menampilkan label langsung
+  //   } catch (e) {
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+
+  //     // Menampilkan error
+  //     _showErrorDialog("Failed to send image: $e");
+  //   }
+  // }
+
+  // simulation
   Future<void> _onCapture(File imageFile) async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final result = await _sendImageToApi(imageFile);
+      // Gunakan fungsi simulasi untuk mendapatkan hasil emosi
+      final result = await _simulateEmotionRequest();
+
       setState(() {
         _isLoading = false;
       });
@@ -91,21 +144,73 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
+  // void _showEmotionResult(String label) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (_) => AlertDialog(
+  //       title: const Text("Emotion Result"),
+  //       content: Text("Detected emotion: $label"),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () {
+  //             Navigator.pop(context);
+  //           },
+  //           child: const Text("OK"),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  // simulation
   void _showEmotionResult(String label) {
+    String getImagePath(String emotion) {
+      switch (emotion.toLowerCase()) {
+        case 'angry':
+          return AppImages.angerEmot;
+        case 'sad':
+          return AppImages.sadEmot;
+        case 'happy':
+          return AppImages.happyEmot;
+        default:
+          return AppImages.calmEmot;
+      }
+    }
+
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Emotion Result"),
-        content: Text("Detected emotion: $label"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text("OK"),
+      barrierDismissible: false,
+      builder: (_) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final imageSize = screenWidth * 0.4;
+
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                getImagePath(label),
+                height: imageSize,
+                width: imageSize,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Detected expression\n$label",
+                style: AppTextStyle.title3,
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.go('/result-page/$label');
+              },
+              child: const Text("Next"),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -164,17 +269,6 @@ class _CameraPageState extends State<CameraPage> {
                               .bottomActionsBackgroundColor,
                           child: const Align(
                             alignment: Alignment.bottomCenter,
-                            // child: Padding(
-                            //   padding: EdgeInsets.only(bottom: 10, top: 10),
-                            //   child: Text(
-                            //     "Take your best shot!",
-                            //     style: TextStyle(
-                            //       color: Colors.white,
-                            //       fontWeight: FontWeight.bold,
-                            //       fontStyle: FontStyle.italic,
-                            //     ),
-                            //   ),
-                            // ),
                           ),
                         );
                       }),
@@ -184,7 +278,8 @@ class _CameraPageState extends State<CameraPage> {
                 bottomActionsBuilder: (state) => AwesomeBottomActions(
                   state: state,
                   left: const SizedBox(width: 20),
-                  right: const SizedBox(width: 20),
+                  // right: const SizedBox(width: 20),
+                  right: AwesomeFlashButton(state: state),
                 ),
                 saveConfig: SaveConfig.photo(
                   mirrorFrontCamera: true,
@@ -242,3 +337,54 @@ class _CameraPageState extends State<CameraPage> {
     );
   }
 }
+
+// class RecommendationPage extends StatelessWidget {
+//   final String emotion;
+
+//   const RecommendationPage({super.key, required this.emotion});
+
+//   Future<void> _fetchRecommendation(
+//       BuildContext context, String emotion) async {
+//     await Future.delayed(
+//         const Duration(seconds: 2)); // Simulasi penundaan 2 detik
+
+//     // Simulasi hasil rekomendasi song ID
+//     String simulatedSongId = "3U4isOIWM3VvDubwSI3y7a";
+
+//     // Menampilkan hasil rekomendasi dalam bentuk alert
+//     print("Rekomendasi Song ID: $simulatedSongId");
+
+//     // Menampilkan dialog dengan rekomendasi
+//     showDialog(
+//       context: context,
+//       builder: (_) => AlertDialog(
+//         title: const Text("Song Recommendation"),
+//         content: Text(
+//             "Based on your emotion ($emotion), we recommend song ID: $simulatedSongId"),
+//         actions: [
+//           TextButton(
+//             onPressed: () {
+//               Navigator.pop(context);
+//             },
+//             child: const Text("OK"),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // Memanggil fungsi _fetchRecommendation setelah build selesai
+//     _fetchRecommendation(context, emotion);
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text("Song Recommendations"),
+//       ),
+//       body: Center(
+//         child: Text("Fetching recommendations for emotion: $emotion"),
+//       ),
+//     );
+//   }
+// }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood_sync/presentation/auth/choose_genre.dart';
 import 'package:mood_sync/presentation/auth/login_spotify.dart';
@@ -8,6 +9,7 @@ import 'package:mood_sync/presentation/error/error_page.dart';
 import 'package:mood_sync/presentation/home/home_page.dart';
 import 'package:mood_sync/presentation/homescreen/playlist_detail_screen.dart';
 import 'package:mood_sync/presentation/intro/get_started.dart';
+import 'package:mood_sync/presentation/recomendation/recomendation_page.dart';
 import 'package:mood_sync/presentation/splash/splash.dart';
 
 class AppRouter {
@@ -70,6 +72,17 @@ class AppRouter {
           return const MaterialPage(child: CameraPage());
         },
       ),
+      GoRoute(
+        path: '/result-page/:emotion',
+        name: 'result-page',
+        builder: (BuildContext context, GoRouterState state) {
+          final emotion = state.pathParameters['emotion'] ??
+              ''; // Ambil emotion dari queryParameters
+          return ResultRecommendationPage(
+              emotion: emotion); // Pass emotion ke ResultRecommendationPage
+        },
+      )
+
       // test hasil camera
       // GoRoute(
       //   path: '/result-camera',
@@ -83,6 +96,15 @@ class AppRouter {
     errorBuilder: (context, state) {
       final errorMessage = state.error?.toString() ?? 'Unknown error occurred';
       return ErrorPage(errorMessage: errorMessage);
+    },
+    redirect: (BuildContext context, GoRouterState state) async {
+      const storage = FlutterSecureStorage();
+      final accessToken = await storage.read(key: 'accessToken');
+
+      if (accessToken != null) {
+        return '/homepage';
+      }
+      return null;
     },
   );
 }
