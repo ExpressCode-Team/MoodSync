@@ -95,42 +95,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Future<void> _fetchPlaylists() async {
-  //   String? accessToken = await _secureStorage.read(key: 'accessToken');
-  //   if (accessToken == null) {
-  //     print("Access token tidak ditemukan!");
-  //     return;
-  //   }
-
-  //   try {
-  //     final response = await http.get(
-  //       Uri.parse('https://api.spotify.com/v1/browse/featured-playlists'),
-  //       headers: {'Authorization': 'Bearer $accessToken'},
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       var data = json.decode(response.body);
-  //       var playlists = data['playlists']['items'];
-
-  //       setState(() {
-  //         playlistData = playlists
-  //             .map<Map<String, dynamic>>((playlist) => {
-  //                   'name': playlist['name'],
-  //                   'id': playlist['id'],
-  //                   'description': playlist['description'],
-  //                   'image': playlist['images'][0]['url'],
-  //                   'url': playlist['external_urls']['spotify'],
-  //                 })
-  //             .toList();
-  //       });
-  //     } else {
-  //       print('Gagal memuat playlist: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print('Error: $e');
-  //   }
-  // }
-
   Future<void> _fetchPlaylists() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? genresJson = prefs.getString('selectedGenres');
@@ -163,53 +127,58 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (response.statusCode == 200) {
           var data = json.decode(response.body);
+          debugPrint('data: $data');
 
-          // Pastikan data 'playlists' dan 'items' ada di respons
           if (data.containsKey('playlists') &&
               data['playlists']['items'] != null) {
             var playlists = data['playlists']['items'];
 
-            // Ambil hanya satu playlist untuk setiap genre
-            if (playlists.isNotEmpty) {
-              var playlist = playlists[0]; // Ambil hanya playlist pertama
+            Map<String, dynamic>? validPlaylist;
+            for (var item in playlists) {
+              if (item != null) {
+                validPlaylist = item;
+                break;
+              }
+            }
+
+            if (validPlaylist != null) {
+              debugPrint('Top Playlist $genre : $validPlaylist');
               fetchedPlaylists.add({
-                'name': playlist['name'] ?? 'No title',
-                'id': playlist['id'],
+                'name': validPlaylist['name'] ?? 'No title',
+                'id': validPlaylist['id'],
                 'description':
-                    playlist['description'] ?? 'No description available',
-                'image': (playlist['images'] != null &&
-                        playlist['images'].isNotEmpty &&
-                        playlist['images'][0]['url'] != null)
-                    ? playlist['images'][0]['url']
-                    : null, // Handle image URL if it's available
-                'url': playlist['external_urls']['spotify'] ??
-                    '', // Ensure URL exists
+                    validPlaylist['description'] ?? 'No description available',
+                'image': (validPlaylist['images'] != null &&
+                        validPlaylist['images'].isNotEmpty &&
+                        validPlaylist['images'][0]['url'] != null)
+                    ? validPlaylist['images'][0]['url']
+                    : null,
+                'url': validPlaylist['external_urls']['spotify'] ?? '',
               });
             } else {
-              print('No playlists found for genre $genre.');
+              debugPrint('No valid playlists found for genre $genre.');
             }
           } else {
-            print('Playlist data kosong atau tidak valid untuk genre $genre.');
+            debugPrint(
+                'Playlist data kosong atau tidak valid untuk genre $genre.');
           }
         } else {
-          print(
+          debugPrint(
               'Gagal memuat playlist untuk genre $genre: ${response.statusCode}, body: ${response.body}');
-          // Jika status code bukan 200, tampilkan pesan error
           setState(() {
             playlistData = [];
           });
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text('Gagal memuat playlist untuk genre $genre')));
-          return; // Menghentikan proses jika ada error
+          return;
         }
       }
 
-      // Update UI dengan playlist yang berhasil diambil
       setState(() {
         playlistData = fetchedPlaylists;
       });
-    } catch (e) {
-      print('Error: $e');
+    } catch (e, stackTrace) {
+      debugPrint('Error: $e\n$stackTrace');
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Terjadi kesalahan saat memuat playlist.')));
     }
@@ -272,8 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _isLoading
                       ? _buildShimmerCards()
                       : playlistData.isEmpty
-                          ? const Center(
-                              child: Text('Unsuccessful in obtaining data'))
+                          ? _buildShimmerCards()
                           : _buildPlaylistCards(context),
                 ],
               ),

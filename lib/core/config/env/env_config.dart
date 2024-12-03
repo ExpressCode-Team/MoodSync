@@ -10,4 +10,6 @@ class EnvConfig {
       'user-read-playback-state, '
       'user-modify-playback-state, '
       'user-read-currently-playing';
+  static String VPS_URL = 'https://facialexpress.raihanproject.my.id/';
+  static String BASE_URL = '127.0.0.1:8000/';
 }

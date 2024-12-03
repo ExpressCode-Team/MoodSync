@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 import 'package:mood_sync/core/config/theme/app_theme.dart';
@@ -7,7 +6,6 @@ import 'package:mood_sync/presentation/router/app_router_configuration.dart';
 
 void main() async {
   await dotenv.load(fileName: '.env');
-  debugPaintSizeEnabled = true;
   runApp(const MyApp());
 }
 

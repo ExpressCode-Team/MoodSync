@@ -1,10 +1,57 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:mood_sync/core/config/assets/app_images.dart';
 import 'package:mood_sync/core/config/theme/app_colors.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final _secureStorage = const FlutterSecureStorage();
+  String userName = 'User'; // Default value
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+  }
+
+  Future<void> fetchUserName() async {
+    try {
+      // Retrieve access token from secure storage
+      String? accessToken = await _secureStorage.read(key: 'accessToken');
+      if (accessToken == null) {
+        throw Exception('Access token not found');
+      }
+
+      // Make request to Spotify API
+      final response = await http.get(
+        Uri.parse('https://api.spotify.com/v1/me'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          userName = data['display_name'] ?? 'User';
+        });
+      } else {
+        throw Exception('Failed to fetch user data: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching user name: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,24 +84,11 @@ class ProfileScreen extends StatelessWidget {
                             radius: 60,
                             backgroundImage: AssetImage(AppImages.happyEmot),
                           ),
-                          // Positioned(
-                          //   bottom: 0,
-                          //   right: 0,
-                          //   child: CircleAvatar(
-                          //     radius: 16,
-                          //     backgroundColor: Colors.white,
-                          //     child: Icon(
-                          //       Icons.edit,
-                          //       size: 18,
-                          //       color: Colors.black,
-                          //     ),
-                          //   ),
-                          // )
                         ],
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'User',
+                        userName,
                         style: AppTextStyle.title1,
                       ),
                       const SizedBox(height: 12),

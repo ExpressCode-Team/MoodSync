@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +13,7 @@ import 'package:mood_sync/presentation/homescreen/playlist_detail_screen.dart';
 import 'package:mood_sync/presentation/intro/get_started.dart';
 import 'package:mood_sync/presentation/recomendation/recomendation_page.dart';
 import 'package:mood_sync/presentation/splash/splash.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -101,10 +104,19 @@ class AppRouter {
       const storage = FlutterSecureStorage();
       final accessToken = await storage.read(key: 'accessToken');
 
-      if (accessToken != null) {
-        return '/homepage';
+      if (accessToken == null) {
+        return null;
       }
-      return null;
+
+      final prefs = await SharedPreferences.getInstance();
+      final selectedGenres = prefs.getString('selectedGenres');
+
+      if (selectedGenres == null ||
+          (json.decode(selectedGenres) as List).isEmpty) {
+        return '/choose-genre';
+      }
+
+      return '/homepage';
     },
   );
 }
