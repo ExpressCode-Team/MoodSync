@@ -2,42 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 
 class RecapEmotionCard extends StatelessWidget {
-  final String emotion;
+  final int expressionId;
   final String time;
   final String message;
-  const RecapEmotionCard(
-      {super.key,
-      required this.emotion,
-      required this.time,
-      required this.message});
+
+  const RecapEmotionCard({
+    super.key,
+    required this.expressionId,
+    required this.time,
+    required this.message, required String emotion,
+  });
 
   @override
   Widget build(BuildContext context) {
     Color avatarColor;
     IconData avatarIcon;
-    String displayEmotion;
+    String emotionLabel;
 
-    switch (emotion.toLowerCase()) {
-      case 'happy':
+    switch (expressionId) {
+      case 1:
         avatarColor = Colors.yellow;
         avatarIcon = Icons.sentiment_satisfied;
-        displayEmotion = 'Happy';
+        emotionLabel = 'Happy';
         break;
-      case 'sad':
+      case 2:
         avatarColor = Colors.blue;
         avatarIcon = Icons.sentiment_dissatisfied;
-        displayEmotion = 'Sad';
+        emotionLabel = 'Sad';
         break;
-      case 'angry':
+      case 3:
         avatarColor = Colors.red;
         avatarIcon = Icons.sentiment_very_dissatisfied;
-        displayEmotion = 'Angry';
+        emotionLabel = 'Angry';
         break;
-      case 'neutral':
+      case 0:
       default:
         avatarColor = Colors.grey;
         avatarIcon = Icons.sentiment_neutral;
-        displayEmotion = 'Neutral';
+        emotionLabel = 'Neutral';
         break;
     }
 
@@ -46,7 +48,7 @@ class RecapEmotionCard extends StatelessWidget {
         backgroundColor: avatarColor,
         child: Icon(avatarIcon, color: Colors.white),
       ),
-      title: Text(displayEmotion, style: AppTextStyle.caption1),
+      title: Text(emotionLabel, style: AppTextStyle.caption1),
       subtitle: Text(
         '$time - $message',
         style: const TextStyle(color: Colors.white70),

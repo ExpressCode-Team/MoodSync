@@ -1,140 +1,134 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:mood_sync/common/widgets/card/recap_emotion_card.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:mood_sync/core/config/theme/app_colors.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
-import 'package:pie_chart/pie_chart.dart';
+import 'package:mood_sync/common/widgets/card/recap_emotion_card.dart';
 
-class StatisticsScreen extends StatelessWidget {
-  final Map<String, double> dataMap = {
-    "angry": 19,
-    "neutral": 32,
-    "happy": 29,
-    "sad": 12,
-  };
+class StatisticsScreen extends StatefulWidget {
+  const StatisticsScreen({super.key});
 
-  final List<Color> colorList = [
-    Colors.red,
-    Colors.green,
-    Colors.yellow,
-    Colors.blue,
-  ];
+  @override
+  _StatisticsScreenState createState() => _StatisticsScreenState();
+}
 
-  final List<Map<String, String>> recapData = [
-    {
-      "emotion": "happy",
-      "time": "18:30",
-      "message": "You felt happy at that time"
-    },
-    {
-      "emotion": "sad",
-      "time": "10:15",
-      "message": "You seemed sad at that time"
-    },
-    {
-      "emotion": "angry",
-      "time": "20:10",
-      "message": "You seemed angry at that time"
-    },
-    {
-      "emotion": "neutral",
-      "time": "14:45",
-      "message": "You were neutral at that time"
-    },
-    {
-      "emotion": "happy",
-      "time": "09:00",
-      "message": "You felt happy in the morning"
-    },
-  ];
+class _StatisticsScreenState extends State<StatisticsScreen> {
+  final _secureStorage = const FlutterSecureStorage();
+  // sesuaikan ip
+  final String apiUrl = "http://192.168.0.171:8000/api/history-expressions";
+  List<dynamic> jsonData = [];
+  bool isLoading = true;
+  String errorMessage = '';
 
-  StatisticsScreen({super.key});
+  @override
+  void initState() {
+    super.initState();
+    fetchHistoryExpressions();
+  }
+
+  Future<void> fetchHistoryExpressions() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
+    try {
+      String? accessToken = await _secureStorage.read(key: 'accessToken');
+      if (accessToken == null) {
+        throw Exception('Access token not found');
+      }
+
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'access_token': accessToken,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> decoded = json.decode(response.body);
+        final List<dynamic> data = decoded['data'] ?? [];
+
+        if (data.isEmpty) {
+          throw Exception('No data returned from API');
+        }
+
+        setState(() {
+          jsonData = data;
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = e.toString();
+      });
+    }
+  }
+
+  String formatDate(String timestamp) {
+    final date = DateTime.parse(timestamp);
+    return DateFormat('HH:mm - dd-MM-yyyy').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Statistics"),
+        backgroundColor: AppColors.primary,
+      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              MediaQuery.of(context).size.width * 0.06,
-              MediaQuery.of(context).size.height * 0.03,
-              MediaQuery.of(context).size.width * 0.06,
-              0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'History',
-                  style: AppTextStyle.title1,
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.grayBackground,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: PieChart(
-                    dataMap: dataMap,
-                    animationDuration: const Duration(milliseconds: 800),
-                    chartRadius: MediaQuery.of(context).size.width / 2.5,
-                    colorList: colorList,
-                    chartType: ChartType.disc,
-                    legendOptions: const LegendOptions(
-                      showLegendsInRow: true,
-                      legendPosition: LegendPosition.bottom,
-                      showLegends: true,
-                      legendTextStyle: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    chartValuesOptions: const ChartValuesOptions(
-                      showChartValueBackground: true,
-                      showChartValuesInPercentage: true,
-                      showChartValuesOutside: false,
-                      decimalPlaces: 0,
-                      chartValueStyle: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Recap',
-                  style: AppTextStyle.headline1,
-                ),
-                const SizedBox(height: 12),
-                // Column(
-                //   children: recapData.map((data) {
-                //     return RecapEmotionCard(
-                //       emotion: data["emotion"]!,
-                //       time: data["time"]!,
-                //       message: data["message"]!,
-                //     );
-                //   }).toList(),
-                // ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Mood Statistics",
+                style: AppTextStyle.headline1,
+              ),
+              const SizedBox(height: 20),
+              if (isLoading)
+                const Center(child: CircularProgressIndicator())
+              else if (errorMessage.isNotEmpty)
                 Column(
-                  children: List.generate(recapData.length, (index) {
-                    return Column(
-                      children: [
-                        RecapEmotionCard(
-                          emotion: recapData[index]["emotion"]!,
-                          time: recapData[index]["time"]!,
-                          message: recapData[index]["message"]!,
-                        ),
-                        // SizedBox untuk memberikan gap di antara kartu, kecuali pada item terakhir
-                        if (index < recapData.length - 1)
-                          const SizedBox(height: 12),
-                      ],
-                    );
-                  }),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Error: $errorMessage',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: fetchHistoryExpressions,
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 )
-              ],
-            ),
+              else
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: jsonData.length,
+                    itemBuilder: (context, index) {
+                      var item = jsonData[index];
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: RecapEmotionCard(
+                          expressionId: item['expression_id'],
+                          time: formatDate(item['created_at'] ?? 'Unknown Time'),
+                          message: item['message'] ?? '', emotion: '',
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
           ),
         ),
       ),
