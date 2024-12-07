@@ -1,12 +1,14 @@
 import 'dart:io';
+import 'dart:convert';
 import 'dart:math';
-
+import 'package:http/http.dart' as http;
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:mood_sync/core/config/assets/app_images.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -19,27 +21,21 @@ class _CameraPageState extends State<CameraPage> {
   bool _isLoading = false; // Untuk kontrol modal loading
   // URL API
   final String apiUrl = "https://facialexpress.raihanproject.my.id/predict/ml/";
+  final String storeDataUrl =
+      "http://192.168.0.171:8000/api/history-expressions";
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   // Simulasi request API untuk mendapatkan emosi
   Future<Map<String, dynamic>> _simulateEmotionRequest() async {
-    await Future.delayed(const Duration(seconds: 2)); // Simulasi delay request
-
-    // Simulasi hasil response dari API
+    await Future.delayed(const Duration(seconds: 2)); // Simulated request delay
     List<String> emotions = ["happy", "sad", "angry", "neutral"];
     String simulatedEmotion = emotions[
         (emotions.length * (DateTime.now().millisecondsSinceEpoch % 100) / 100)
             .floor()];
-
-    // Simulasi prediksi
-    List<int> predictions = [
-      1,
-      2,
-      3
-    ]; // Misalnya prediksi ini adalah ID untuk suatu emosi
-
+    List<int> predictions = [1, 2, 3]; // Dummy prediction list
     return {
       "predict": predictions,
-      "label": simulatedEmotion, // Label emosi yang diterima
+      "label": simulatedEmotion,
     };
   }
 
@@ -131,6 +127,13 @@ class _CameraPageState extends State<CameraPage> {
         _isLoading = false;
       });
 
+      String token = await _getAccessToken(); // Get access token securely
+
+      if (result["predict"] != null && result["predict"].isNotEmpty) {
+        // Get the correct expression ID based on detected emotion
+        int expressionId = _getExpressionId(result["label"]);
+        await _storeDataToApi(token, expressionId); // Send data to the API
+      }
       // Menampilkan hasil API
       print(result);
       _showEmotionResult(result["label"]); // Menampilkan label langsung
@@ -161,6 +164,61 @@ class _CameraPageState extends State<CameraPage> {
   //     ),
   //   );
   // }
+
+    Future<String> _getAccessToken() async {
+    try {
+      String? token = await _secureStorage.read(key: 'accessToken');
+      if (token == null) {
+        print("Token not found in secure storage.");
+        throw Exception("Access token is not available.");
+      }
+      print("Token retrieved: $token");
+      return token;
+    } catch (e) {
+      print("Error reading token from secure storage: $e");
+      throw Exception("Error reading token: $e");
+    }
+  }
+
+    int _getExpressionId(String label) {
+    switch (label.toLowerCase()) {
+      case 'angry':
+        return 0; 
+      case 'happy':
+        return 1;
+      case 'neutral':
+        return 2; 
+      case 'sad':
+        return 3;
+      default:
+        return 2;
+    }
+  }
+
+    Future<void> _storeDataToApi(String accessToken, int expressionId) async {
+    try {
+      print("Sending request to store data...");
+      final response = await http.post(
+        Uri.parse(storeDataUrl),
+        headers: {
+          'access_token': accessToken, 
+        },
+        body: {
+          'expression_id':
+              expressionId.toString(), 
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint("Data stored successfully: ${response.body}");
+      } else {
+        throw Exception(
+            "Failed to store data. Status code: ${response.statusCode}. Response: ${response.body}");
+      }
+    } catch (e) {
+      debugPrint("Error storing data to API: $e");
+    }
+  }
 
   // simulation
   void _showEmotionResult(String label) {

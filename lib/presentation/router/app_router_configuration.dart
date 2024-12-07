@@ -100,23 +100,23 @@ class AppRouter {
       final errorMessage = state.error?.toString() ?? 'Unknown error occurred';
       return ErrorPage(errorMessage: errorMessage);
     },
-    redirect: (BuildContext context, GoRouterState state) async {
-      const storage = FlutterSecureStorage();
-      final accessToken = await storage.read(key: 'accessToken');
+    // redirect: (BuildContext context, GoRouterState state) async {
+    //   const storage = FlutterSecureStorage();
+    //   final accessToken = await storage.read(key: 'accessToken');
 
-      if (accessToken == null) {
-        return null;
-      }
+    //   if (accessToken == null) {
+    //     return null;
+    //   }
 
-      final prefs = await SharedPreferences.getInstance();
-      final selectedGenres = prefs.getString('selectedGenres');
+    //   final prefs = await SharedPreferences.getInstance();
+    //   final selectedGenres = prefs.getString('selectedGenres');
 
-      if (selectedGenres == null ||
-          (json.decode(selectedGenres) as List).isEmpty) {
-        return '/choose-genre';
-      }
+    //   if (selectedGenres == null ||
+    //       (json.decode(selectedGenres) as List).isEmpty) {
+    //     return '/choose-genre';
+    //   }
 
-      return '/homepage';
-    },
+    //   return '/homepage';
+    // },
   );
 }
