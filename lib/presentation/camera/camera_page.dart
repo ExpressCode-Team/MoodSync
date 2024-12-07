@@ -21,6 +21,7 @@ class _CameraPageState extends State<CameraPage> {
   bool _isLoading = false; // Untuk kontrol modal loading
   // URL API
   final String apiUrl = "https://facialexpress.raihanproject.my.id/predict/ml/";
+  // Sesuaikan api
   final String storeDataUrl =
       "http://192.168.0.171:8000/api/history-expressions";
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
@@ -127,16 +128,13 @@ class _CameraPageState extends State<CameraPage> {
         _isLoading = false;
       });
 
-      String token = await _getAccessToken(); // Get access token securely
+      String token = await _getAccessToken();
 
       if (result["predict"] != null && result["predict"].isNotEmpty) {
-        // Get the correct expression ID based on detected emotion
         int expressionId = _getExpressionId(result["label"]);
-        await _storeDataToApi(token, expressionId); // Send data to the API
+        await _storeDataToApi(token, expressionId);
       }
-      // Menampilkan hasil API
-      print(result);
-      _showEmotionResult(result["label"]); // Menampilkan label langsung
+      _showEmotionResult(result["label"]);
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -165,29 +163,26 @@ class _CameraPageState extends State<CameraPage> {
   //   );
   // }
 
-    Future<String> _getAccessToken() async {
+  Future<String> _getAccessToken() async {
     try {
       String? token = await _secureStorage.read(key: 'accessToken');
       if (token == null) {
-        print("Token not found in secure storage.");
         throw Exception("Access token is not available.");
       }
-      print("Token retrieved: $token");
       return token;
     } catch (e) {
-      print("Error reading token from secure storage: $e");
       throw Exception("Error reading token: $e");
     }
   }
 
-    int _getExpressionId(String label) {
+  int _getExpressionId(String label) {
     switch (label.toLowerCase()) {
       case 'angry':
-        return 0; 
+        return 0;
       case 'happy':
         return 1;
       case 'neutral':
-        return 2; 
+        return 2;
       case 'sad':
         return 3;
       default:
@@ -195,17 +190,15 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
-    Future<void> _storeDataToApi(String accessToken, int expressionId) async {
+  Future<void> _storeDataToApi(String accessToken, int expressionId) async {
     try {
-      print("Sending request to store data...");
       final response = await http.post(
         Uri.parse(storeDataUrl),
         headers: {
-          'access_token': accessToken, 
+          'access_token': accessToken,
         },
         body: {
-          'expression_id':
-              expressionId.toString(), 
+          'expression_id': expressionId.toString(),
         },
       );
 
