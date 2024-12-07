@@ -18,30 +18,36 @@ class RecapEmotionCard extends StatelessWidget {
     Color avatarColor;
     IconData avatarIcon;
     String emotionLabel;
+    String message;
 
-    switch (expressionId) {
-      case 1:
-        avatarColor = Colors.yellow;
-        avatarIcon = Icons.sentiment_satisfied;
-        emotionLabel = 'Happy';
-        break;
-      case 2:
-        avatarColor = Colors.blue;
-        avatarIcon = Icons.sentiment_dissatisfied;
-        emotionLabel = 'Sad';
-        break;
-      case 3:
-        avatarColor = Colors.red;
-        avatarIcon = Icons.sentiment_very_dissatisfied;
-        emotionLabel = 'Angry';
-        break;
-      case 0:
-      default:
-        avatarColor = Colors.grey;
-        avatarIcon = Icons.sentiment_neutral;
-        emotionLabel = 'Neutral';
-        break;
-    }
+
+  switch (expressionId) {
+    case 1:
+      avatarColor = Colors.yellow;
+      avatarIcon = Icons.sentiment_satisfied;
+      emotionLabel = 'Happy';
+      message = 'You’re feeling good! Keep it up!';
+      break;
+    case 2:
+      avatarColor = Colors.grey;
+      avatarIcon = Icons.sentiment_neutral;
+      emotionLabel = 'Neutral';
+      message = 'Just okay. How’s your day going?';
+      break;
+    case 3:
+      avatarColor = Colors.blue;
+      avatarIcon = Icons.sentiment_dissatisfied;
+      emotionLabel = 'Sad';
+      message = 'Feeling low? Take your time';
+      break;
+    case 0:
+    default:
+      avatarColor = Colors.red;
+      avatarIcon = Icons.sentiment_very_dissatisfied;
+      emotionLabel = 'Angry';
+      message = 'You’re really upset. Try to relax and calm down.';
+      break;
+  }
 
     return ListTile(
       leading: CircleAvatar(
