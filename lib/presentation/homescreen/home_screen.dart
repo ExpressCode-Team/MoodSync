@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String encodedGenres = Uri.encodeComponent(genresParam);
 
     print('selectedGenres yang disimpan: $genresList');
-    print('encodedGenres: $encodedGenres');
+    // print('encodedGenres: $encodedGenres');
 
     String? accessToken = await _secureStorage.read(key: 'accessToken');
     if (accessToken == null) {
@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
         var tracks = data['tracks'];
-        print('tracks: $tracks');
+        // print('tracks: $tracks');
 
         setState(() {
           trackData = tracks
@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (response.statusCode == 200) {
           var data = json.decode(response.body);
-          debugPrint('data: $data');
+          // debugPrint('data: $data');
 
           if (data.containsKey('playlists') &&
               data['playlists']['items'] != null) {
@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
             }
 
             if (validPlaylist != null) {
-              debugPrint('Top Playlist $genre : $validPlaylist');
+              // debugPrint('Top Playlist $genre : $validPlaylist');
               fetchedPlaylists.add({
                 'name': validPlaylist['name'] ?? 'No title',
                 'id': validPlaylist['id'],
@@ -337,18 +337,14 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.only(right: 16),
             child: GestureDetector(
               onTap: () {
-                // Implementasikan navigasi ke detail playlist jika diperlukan
                 final playlist = playlistData[index];
-                final playlistId = playlist['id']; // Ambil id playlist
-                print('playlistId: $playlistId');
-                // final playlistName = playlist['name']; // Ambil nama playlist
-                // Gunakan GoRouter untuk navigasi ke halaman detail playlist
+                final playlistId = playlist['id'];
+                print('Navigating to playlist/$playlistId');
                 context.push('/playlist/$playlistId');
               },
               child: Container(
                 width: cardWidth,
-                height: cardHeight +
-                    50, // Menambahkan sedikit ruang untuk deskripsi
+                height: cardHeight + 50,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   color: AppColors.darkBackground,
@@ -385,14 +381,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(
-                              height: 4), // Jarak antara judul dan deskripsi
+                          const SizedBox(height: 4),
                           Text(
                             playlist['description'] ??
                                 'No description available',
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Colors.grey, // Deskripsi berwarna abu-abu
+                              color: Colors.grey,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:mood_sync/core/config/assets/app_images.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ResultRecommendationPage extends StatefulWidget {
   final String emotion; // Emotion diterima sebagai parameter
@@ -30,38 +31,38 @@ class _ResultRecommendationPageState extends State<ResultRecommendationPage> {
     _fetchRecommendations();
   }
 
-  // Simulasi fungsi untuk mendapatkan songIds berdasarkan emosi
   Future<void> _fetchRecommendations() async {
-    // Simulasi delay untuk proses fetching data
-    await Future.delayed(const Duration(seconds: 2));
+    final String accessToken =
+        await _secureStorage.read(key: 'accessToken') ?? '';
+    final String emotion = widget.emotion;
+    const int numSongs = 10;
 
-    // Simulasi songId berdasarkan emosi
-    List<String> simulatedSongIds = [];
-    if (widget.emotion == 'happy') {
-      simulatedSongIds = [
-        '3U4isOIWM3VvDubwSI3y7a',
-        '305WCRhhS10XUcH6AEwZk6',
-        '2s25Z079T5KRzfqEQRMQQ4',
-      ];
-    } else if (widget.emotion == 'sad') {
-      simulatedSongIds = [
-        '1qUaWLUot3Iik95S09cdSZ',
-        '2KSCegx6TosQQEgmhJKNQa',
-        '0AG2l0IboWNSwjUkMr2Aq7',
-      ];
-    } else {
-      simulatedSongIds = [
-        '6QxTWEvzcJljVZaeTzuHF1',
-        '4QdwsME04RG25KPHcPYoox',
-        '2rPJcL8gQauA2nBdRyNZZL',
-      ];
+    final Uri uri = Uri.parse(
+        'https://facialexpress.raihanproject.my.id/spotify/recommend-songs/?access_token=$accessToken&emotion=$emotion&num_songs=$numSongs');
+
+    try {
+      final http.Response response = await http.post(uri);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> songs = data['songs'] ?? [];
+
+        setState(() {
+          recommendedSongs = songs.map((song) => song['id'] as String).toList();
+          _isLoading = false;
+        });
+      } else {
+        print('Failed to fetch recommendations: ${response.reasonPhrase}');
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching recommendations: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    setState(() {
-      recommendedSongs =
-          simulatedSongIds; // Mengupdate dengan list songId yang telah disimulasikan
-      _isLoading = false;
-    });
   }
 
   // Fungsi untuk shimmer effect saat loading
@@ -124,90 +125,114 @@ class _ResultRecommendationPageState extends State<ResultRecommendationPage> {
     }
   }
 
+  void _openSpotifyUrl(String url) {
+    // Implementasikan navigasi ke aplikasi Spotify
+    print('Opening Spotify URL: $url');
+    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // SliverAppBar untuk menampilkan gambar emosi dan info lainnya
-          SliverAppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.go('/homepage'),
-            ),
-            expandedHeight: 250.0,
-            floating: false,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text('Emotion: ${widget.emotion}'),
-              background: CachedNetworkImage(
-                imageUrl: getImagePath(widget.emotion),
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  color: Colors.grey,
+      body: _isLoading
+          ? _buildShimmer()
+          : CustomScrollView(
+              slivers: [
+                // SliverAppBar untuk menampilkan gambar emosi dan info lainnya
+                SliverAppBar(
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.go('/homepage'),
+                  ),
+                  expandedHeight: 250.0,
+                  floating: false,
+                  pinned: true,
+                  flexibleSpace: FlexibleSpaceBar(
+                    title:
+                        Text('Recomendation for your mood: ${widget.emotion}'),
+                    background: recommendedSongs.isNotEmpty
+                        ? FutureBuilder(
+                            future: _fetchTrackDetails(recommendedSongs.first),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Container(color: Colors.grey);
+                              }
+
+                              if (snapshot.hasError || !snapshot.hasData) {
+                                return const Icon(Icons.error,
+                                    color: Colors.red);
+                              }
+
+                              final trackData = snapshot.data!;
+                              final imageUrl =
+                                  trackData['album']['images'][0]['url'];
+                              return CachedNetworkImage(
+                                imageUrl: imageUrl,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) =>
+                                    Container(color: Colors.grey),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error, color: Colors.red),
+                              );
+                            },
+                          )
+                        : Container(color: Colors.grey),
+                  ),
                 ),
-                errorWidget: (context, url, error) =>
-                    const Icon(Icons.error, color: Colors.red),
-              ),
-            ),
-          ),
-          // Jika masih loading, tampilkan shimmer
-          if (_isLoading)
-            SliverFillRemaining(
-              child: _buildShimmer(),
-            ),
-          // SliverList untuk daftar lagu yang direkomendasikan
-          if (!_isLoading)
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final songId = recommendedSongs[index];
+                // SliverList untuk daftar lagu yang direkomendasikan
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final songId = recommendedSongs[index];
 
-                  return FutureBuilder<Map<String, dynamic>>(
-                    future: _fetchTrackDetails(songId),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const ListTile(
-                          leading: CircularProgressIndicator(),
-                          title: Text('Loading...'),
-                        );
-                      }
+                      return FutureBuilder<Map<String, dynamic>>(
+                        future: _fetchTrackDetails(songId),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const ListTile(
+                              leading: CircularProgressIndicator(),
+                              title: Text('Loading...'),
+                            );
+                          }
 
-                      if (snapshot.hasError) {
-                        return ListTile(
-                          title: Text('Error: ${snapshot.error}'),
-                        );
-                      }
+                          if (snapshot.hasError) {
+                            return ListTile(
+                              title: Text('Error: ${snapshot.error}'),
+                            );
+                          }
 
-                      final trackData = snapshot.data!;
-                      return ListTile(
-                        leading: CachedNetworkImage(
-                          imageUrl: trackData['album']['images'][0]['url'],
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: Colors.grey,
-                          ),
-                          errorWidget: (context, url, error) =>
-                              const Icon(Icons.error, color: Colors.red),
-                        ),
-                        title: Text(trackData['name']),
-                        subtitle: Text(trackData['artists'][0]['name']),
-                        trailing: IconButton(
-                          icon:
-                              const Icon(Icons.play_arrow, color: Colors.green),
-                          onPressed: () => print('Play $songId'),
-                        ),
+                          final trackData = snapshot.data!;
+                          return ListTile(
+                            leading: CachedNetworkImage(
+                              imageUrl: trackData['album']['images'][0]['url'],
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: Colors.grey,
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error, color: Colors.red),
+                            ),
+                            title: Text(trackData['name']),
+                            subtitle: Text(trackData['artists'][0]['name']),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.play_arrow,
+                                  color: Colors.green),
+                              onPressed: () =>
+                                  _openSpotifyUrl(trackData['uri']),
+                            ),
+                          );
+                        },
                       );
                     },
-                  );
-                },
-                childCount: recommendedSongs.length,
-              ),
+                    childCount: recommendedSongs.length,
+                  ),
+                ),
+              ],
             ),
-        ],
-      ),
     );
   }
 

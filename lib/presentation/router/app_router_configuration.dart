@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood_sync/presentation/auth/choose_genre.dart';
 import 'package:mood_sync/presentation/auth/login_spotify.dart';
@@ -13,7 +10,6 @@ import 'package:mood_sync/presentation/homescreen/playlist_detail_screen.dart';
 import 'package:mood_sync/presentation/intro/get_started.dart';
 import 'package:mood_sync/presentation/recomendation/recomendation_page.dart';
 import 'package:mood_sync/presentation/splash/splash.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -79,10 +75,8 @@ class AppRouter {
         path: '/result-page/:emotion',
         name: 'result-page',
         builder: (BuildContext context, GoRouterState state) {
-          final emotion = state.pathParameters['emotion'] ??
-              ''; // Ambil emotion dari queryParameters
-          return ResultRecommendationPage(
-              emotion: emotion); // Pass emotion ke ResultRecommendationPage
+          final emotion = state.pathParameters['emotion'] ?? '';
+          return ResultRecommendationPage(emotion: emotion);
         },
       )
 
@@ -100,23 +94,23 @@ class AppRouter {
       final errorMessage = state.error?.toString() ?? 'Unknown error occurred';
       return ErrorPage(errorMessage: errorMessage);
     },
-    redirect: (BuildContext context, GoRouterState state) async {
-      const storage = FlutterSecureStorage();
-      final accessToken = await storage.read(key: 'accessToken');
+    // redirect: (BuildContext context, GoRouterState state) async {
+    //   const storage = FlutterSecureStorage();
+    //   final accessToken = await storage.read(key: 'accessToken');
 
-      if (accessToken == null) {
-        return null;
-      }
+    //   if (accessToken == null) {
+    //     return null;
+    //   }
 
-      final prefs = await SharedPreferences.getInstance();
-      final selectedGenres = prefs.getString('selectedGenres');
+    //   final prefs = await SharedPreferences.getInstance();
+    //   final selectedGenres = prefs.getString('selectedGenres');
 
-      if (selectedGenres == null ||
-          (json.decode(selectedGenres) as List).isEmpty) {
-        return '/choose-genre';
-      }
+    //   if (selectedGenres == null ||
+    //       (json.decode(selectedGenres) as List).isEmpty) {
+    //     return '/choose-genre';
+    //   }
 
-      return '/homepage';
-    },
+    //   return '/homepage';
+    // },
   );
 }

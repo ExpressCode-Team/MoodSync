@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PlaylistDetailScreen extends StatefulWidget {
   final String playlistId;
@@ -25,6 +26,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
 
   @override
   void initState() {
+    print('Masuk Detail Playlist');
     super.initState();
     _fetchPlaylistDetails();
   }
@@ -72,6 +74,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
   void _openSpotifyUrl(String url) {
     // Implementasikan navigasi ke aplikasi Spotify
     print('Opening Spotify URL: $url');
+    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 
   Widget _buildShimmer() {

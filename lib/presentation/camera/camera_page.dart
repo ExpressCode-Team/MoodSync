@@ -1,10 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:mood_sync/core/config/assets/app_images.dart';
+import 'package:mood_sync/core/config/env/env_config.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -18,7 +20,7 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> {
   bool _isLoading = false; // Untuk kontrol modal loading
   // URL API
-  final String apiUrl = "https://facialexpress.raihanproject.my.id/predict/ml/";
+  final String apiUrl = "${EnvConfig.VPS_URL}predict/ml/";
 
   // Simulasi request API untuk mendapatkan emosi
   Future<Map<String, dynamic>> _simulateEmotionRequest() async {
@@ -44,89 +46,64 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<Map<String, dynamic>> _sendImageToApi(File imageFile) async {
-    // Simulasi pengiriman data ke API dengan data dummy
-    await Future.delayed(const Duration(seconds: 1)); // Simulasi loading API
+    // simulasi
+    // // Simulasi pengiriman data ke API dengan data dummy
+    // await Future.delayed(const Duration(seconds: 1));
 
-    // Hasil dummy (random predicted value antara 1-4)
-    int predicted = Random().nextInt(4) + 1; // Nilai antara 1-4
-    return {"predicted": predicted};
+    // // Hasil dummy (random predicted value antara 1-4)
+    // int predicted = Random().nextInt(4) + 1; // Nilai antara 1-4
+    // return {"predicted": predicted};
+    // end simualasi
 
     // aseli
-    // try {
-    //   // Membuat request multipart
-    //   var request = http.MultipartRequest('POST', Uri.parse(apiUrl))
-    //     ..files.add(await http.MultipartFile.fromPath(
-    //       'file', // Nama field yang diterima API
-    //       imageFile.path,
-    //     ));
+    try {
+      // Membuat request multipart
+      var request = http.MultipartRequest('POST', Uri.parse(apiUrl))
+        ..files.add(await http.MultipartFile.fromPath(
+          'file', // Nama field yang diterima API
+          imageFile.path,
+        ));
 
-    //   // Menambahkan header 'Accept' untuk menerima JSON
-    //   request.headers.addAll({'Accept': 'application/json'});
+      // Menambahkan header 'Accept' untuk menerima JSON
+      request.headers.addAll({'Accept': 'application/json'});
 
-    //   // Kirim permintaan dan tunggu respons
-    //   var streamedResponse = await request.send();
-    //   var response = await http.Response.fromStream(streamedResponse);
+      // Kirim permintaan dan tunggu respons
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
 
-    //   if (response.statusCode == 200) {
-    //     // Decode JSON response
-    //     Map<String, dynamic> result = jsonDecode(response.body);
-    //     print("Response JSON: $result");
+      if (response.statusCode == 200) {
+        // Decode JSON response
+        Map<String, dynamic> result = jsonDecode(response.body);
+        print("Response JSON: $result");
 
-    //     // Menangani kasus jika tidak ada wajah yang terdeteksi
-    //     if (result["label"] == "Relevant landmark not detected") {
-    //       throw Exception('No face detected. Please try again.');
-    //     }
+        // Menangani kasus jika tidak ada wajah yang terdeteksi
+        if (result["label"] == "Relevant landmark not detected") {
+          throw Exception('No face detected. Please try again.');
+        }
 
-    //     // Parsing the string list to actual integer list
-    //     List<int> predictions = List<int>.from(jsonDecode(result["predict"]));
+        // Parsing the string list to actual integer list
+        List<int> predictions = List<int>.from(jsonDecode(result["predict"]));
 
-    //     return {
-    //       "predict": predictions,
-    //       "label": result["label"], // Menyimpan label emosi yang diterima
-    //     };
-    //   } else {
-    //     throw Exception('Failed to connect: ${response.statusCode}');
-    //   }
-    // } catch (e) {
-    //   throw Exception('Error sending image to API: $e');
-    // }
+        return {
+          "predict": predictions,
+          "label": result["label"], // Menyimpan label emosi yang diterima
+        };
+      } else {
+        throw Exception('Failed to connect: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error sending image to API: $e');
+    }
   }
 
   // aseli
-  // Future<void> _onCapture(File imageFile) async {
-  //   setState(() {
-  //     _isLoading = true;
-  //   });
-
-  //   try {
-  //     final result = await _sendImageToApi(imageFile);
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-
-  //     // Menampilkan hasil API
-  //     print(result);
-  //     _showEmotionResult(result["label"]); // Menampilkan label langsung
-  //   } catch (e) {
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-
-  //     // Menampilkan error
-  //     _showErrorDialog("Failed to send image: $e");
-  //   }
-  // }
-
-  // simulation
   Future<void> _onCapture(File imageFile) async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Gunakan fungsi simulasi untuk mendapatkan hasil emosi
-      final result = await _simulateEmotionRequest();
-
+      final result = await _sendImageToApi(imageFile);
       setState(() {
         _isLoading = false;
       });
@@ -143,6 +120,33 @@ class _CameraPageState extends State<CameraPage> {
       _showErrorDialog("Failed to send image: $e");
     }
   }
+
+  // simulation
+  // Future<void> _onCapture(File imageFile) async {
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+
+  //   try {
+  //     // Gunakan fungsi simulasi untuk mendapatkan hasil emosi
+  //     final result = await _simulateEmotionRequest();
+
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+
+  //     // Menampilkan hasil API
+  //     print(result);
+  //     _showEmotionResult(result["label"]); // Menampilkan label langsung
+  //   } catch (e) {
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+
+  //     // Menampilkan error
+  //     _showErrorDialog("Failed to send image: $e");
+  //   }
+  // }
 
   // void _showEmotionResult(String label) {
   //   showDialog(
