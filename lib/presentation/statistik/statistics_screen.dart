@@ -17,7 +17,7 @@ class StatisticsScreen extends StatefulWidget {
 class _StatisticsScreenState extends State<StatisticsScreen> {
   final _secureStorage = const FlutterSecureStorage();
   // sesuaikan ip
-  final String apiUrl = "http://192.168.0.171:8000/api/history-expressions";
+  final String apiUrl = "https://laravelmobile.raihanproject.my.id/api/history-expressions";
   List<dynamic> jsonData = [];
   bool isLoading = true;
   String errorMessage = '';

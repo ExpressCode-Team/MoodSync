@@ -153,7 +153,7 @@ Future<void> _storeDataToApi() async {
     // Send request to store data
     print("Sending request to store data...");
     final response = await http.post(
-      Uri.parse("http://192.168.0.171:8000/api/users"),
+      Uri.parse("https://laravelmobile.raihanproject.my.id/api/users"),
       headers: {
         'access_token': accessToken,
       },

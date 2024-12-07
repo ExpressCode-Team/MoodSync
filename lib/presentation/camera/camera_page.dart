@@ -23,7 +23,7 @@ class _CameraPageState extends State<CameraPage> {
   final String apiUrl = "https://facialexpress.raihanproject.my.id/predict/ml/";
   // Sesuaikan api
   final String storeDataUrl =
-      "http://192.168.0.171:8000/api/history-expressions";
+      "https://laravelmobile.raihanproject.my.id/api/history-expressions";
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   // Simulasi request API untuk mendapatkan emosi
@@ -132,7 +132,8 @@ class _CameraPageState extends State<CameraPage> {
 
       if (result["predict"] != null && result["predict"].isNotEmpty) {
         int expressionId = _getExpressionId(result["label"]);
-        await _storeDataToApi(token, expressionId);
+        await _storeDataToApi(token,
+            expressionId);
       }
       _showEmotionResult(result["label"]);
     } catch (e) {
