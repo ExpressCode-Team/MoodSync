@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _lastHistoryExpression;
   List<Map<String, dynamic>> trackData = [];
   List<Map<String, dynamic>> playlistData = [];
-  final baseUrl = EnvConfig.BASE_URL;
+  final baseUrl = EnvConfig.BASE_URL_LARAVEL;
 
   @override
   void initState() {
@@ -46,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchLastHistoryExpression() async {
     final String apiUrl = '$baseUrl/api/last-history-expressions';
+    print("Try fetching last history expression on  $apiUrl");
 
     try {
       // Ambil access token dari secure storage

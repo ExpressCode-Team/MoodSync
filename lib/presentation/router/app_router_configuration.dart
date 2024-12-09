@@ -13,7 +13,7 @@ import 'package:mood_sync/presentation/splash/splash.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/get-started',
+    initialLocation: '/splash',
     routes: [
       GoRoute(
         path: '/splash',

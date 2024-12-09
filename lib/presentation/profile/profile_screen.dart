@@ -111,18 +111,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               _buildDivider(),
                               _buildMenuItem(
-                                icon: Icons.help_outline,
-                                title: 'FAQ\'s',
-                                onTap: () {},
-                              ),
-                              _buildDivider(),
-                              _buildMenuItem(
-                                icon: Icons.star_border,
-                                title: 'Rate our app',
-                                onTap: () {},
-                              ),
-                              _buildDivider(),
-                              _buildMenuItem(
                                 icon: Icons.info_outline,
                                 title: 'About Us',
                                 onTap: () {},
@@ -130,13 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _buildDivider(),
                               _buildMenuItem(
                                 icon: Icons.privacy_tip_outlined,
-                                title: 'Privacy Policy',
-                                onTap: () {},
-                              ),
-                              _buildDivider(),
-                              _buildMenuItem(
-                                icon: Icons.article_outlined,
-                                title: 'Terms & Condition',
+                                title: 'Log out',
                                 onTap: () {},
                               ),
                             ],
