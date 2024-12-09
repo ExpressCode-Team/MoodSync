@@ -1,9 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:mood_sync/common/widgets/checkbox/checkbox_image_genre.dart';
 import 'package:mood_sync/common/widgets/input/search_text_field.dart';
+import 'package:mood_sync/core/config/env/env_config.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -71,7 +74,7 @@ class ChooseGenre extends StatefulWidget {
   const ChooseGenre({super.key});
 
   @override
-  State<ChooseGenre> createState() => _ChooseGenreState();
+  _ChooseGenreState createState() => _ChooseGenreState();
 }
 
 class _ChooseGenreState extends State<ChooseGenre> {
@@ -82,6 +85,7 @@ class _ChooseGenreState extends State<ChooseGenre> {
   List<String> filteredGenreData = staticGenres;
 
   final TextEditingController _searchController = TextEditingController();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -108,17 +112,87 @@ class _ChooseGenreState extends State<ChooseGenre> {
       genreCheckedMap.values.where((checked) => checked).length;
 
   Future<void> submitCheckedValues() async {
-    // Ambil genre yang dipilih berdasarkan Map
-    List<String> checkedGenres = genreCheckedMap.entries
-        .where((entry) => entry.value)
-        .map((entry) => entry.key)
-        .toList();
+    if (selectedCount >= 3) {
+      // Ambil genre yang dipilih berdasarkan Map
+      List<String> checkedGenres = genreCheckedMap.entries
+          .where((entry) => entry.value)
+          .map((entry) => entry.key)
+          .toList();
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('selectedGenres', json.encode(checkedGenres));
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('selectedGenres', json.encode(checkedGenres));
 
-    print('Genre yang dicentang: $checkedGenres');
-    context.go('/homepage');
+      print('Genre yang dicentang: $checkedGenres');
+      await _storeDataToApi();
+      setState(() {
+        // Perbarui state atau navigasi setelah data disimpan
+        context.go('/homepage');
+      });
+    } else {
+      debugPrint("Please select at least 3 genres.");
+    }
+  }
+
+  Future<void> _storeDataToApi() async {
+    try {
+      // Retrieve access token
+      String accessToken = await _getAccessToken();
+      print("Access token retrieved: $accessToken");
+      String baseUrl = EnvConfig.BASE_URL_LARAVEL;
+
+      // Get checked genres
+      List<String> checkedGenres = genreCheckedMap.entries
+          .where((entry) => entry.value)
+          .map((entry) => entry.key)
+          .toList();
+      print("Checked genres: $checkedGenres");
+
+      // Create payload for API request
+      Map<String, dynamic> payload = {
+        'selectedGenres': checkedGenres,
+      };
+      print("Payload to send: $payload");
+
+      // Send request to store data
+      print("Sending request to store data...");
+      print("Sending to $baseUrl/api/users");
+      final response = await http.post(
+        Uri.parse("$baseUrl/api/users"),
+        headers: {
+          'access_token': accessToken,
+        },
+      );
+
+      // Log status and response
+      print("Request URL: ${response.request?.url}");
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      // Check if the response is successful
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint("Data stored successfully: ${response.body}");
+      } else {
+        throw Exception(
+            "Failed to store data. Status code: ${response.statusCode}. Response: ${response.body}");
+      }
+    } catch (e) {
+      debugPrint("Error storing data to API: $e");
+    }
+  }
+
+  Future<String> _getAccessToken() async {
+    try {
+      String? token = await _secureStorage.read(key: 'accessToken');
+      if (token == null) {
+        print("Token not found in secure storage.");
+        throw Exception("Access token is not available.");
+      }
+      print("Token retrieved: $token");
+      return token;
+    } catch (e) {
+      print("Error reading token from secure storage: $e");
+      throw Exception("Error reading token: $e");
+    }
   }
 
   @override

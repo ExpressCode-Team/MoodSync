@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mood_sync/core/config/assets/app_images.dart';
-import 'package:mood_sync/core/config/theme/app_colors.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 
 class EmotionCard extends StatelessWidget {
@@ -27,11 +26,10 @@ class EmotionCard extends StatelessWidget {
         backgroundColor = const Color.fromARGB(255, 40, 40, 255);
         imageAsset = AppImages.sadEmot;
         break;
-      case 'anger':
+      case 'angry':
         backgroundColor = const Color.fromARGB(255, 255, 0, 0);
         imageAsset = AppImages.angerEmot;
         break;
-      case 'netral':
       default:
         backgroundColor = const Color.fromARGB(255, 128, 128, 128);
         imageAsset = AppImages.calmEmot;
@@ -48,9 +46,9 @@ class EmotionCard extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             child: Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: AppColors.primary, //backgroundColor
-                borderRadius: BorderRadius.all(Radius.circular(12)),
+              decoration: BoxDecoration(
+                color: backgroundColor, //backgroundColor
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:mood_sync/common/widgets/card/emotion_card.dart';
 import 'package:mood_sync/core/config/assets/app_vectors.dart';
+import 'package:mood_sync/core/config/env/env_config.dart';
 import 'package:mood_sync/core/config/theme/app_colors.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,14 +23,87 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   bool _isLoading = true;
+  String? _lastHistoryExpression;
   List<Map<String, dynamic>> trackData = [];
   List<Map<String, dynamic>> playlistData = [];
+  final baseUrl = EnvConfig.BASE_URL;
 
   @override
   void initState() {
     super.initState();
-    _fetchRecommendations();
-    _fetchPlaylists();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    setState(() => _isLoading = true);
+    await Future.wait([
+      _fetchRecommendations(),
+      _fetchPlaylists(),
+      _fetchLastHistoryExpression(),
+    ]);
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> _fetchLastHistoryExpression() async {
+    final String apiUrl = '$baseUrl/api/last-history-expressions';
+
+    try {
+      // Ambil access token dari secure storage
+      String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+      if (accessToken == null) {
+        throw Exception('Access token not found');
+      }
+
+      // Lakukan request ke API
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'access_token': accessToken, // Header untuk autentikasi
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Parse response body jika berhasil
+        final Map<String, dynamic> decodedResponse = json.decode(response.body);
+
+        final data = decodedResponse['data'];
+
+        if (data != null && data['expression_id'] != null) {
+          final int expressionId = data['expression_id'];
+          print('Expression ID: $expressionId');
+
+          String emotion = _getExpressionLabel(expressionId);
+          print('Emotion Label: $emotion');
+
+          setState(() {
+            _lastHistoryExpression = emotion;
+          });
+        } else {
+          throw Exception('Expression ID not found in the response');
+        }
+      } else {
+        throw Exception(
+            'Failed to fetch data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching last history expression: $e');
+    }
+  }
+
+  String _getExpressionLabel(int id) {
+    switch (id) {
+      case 0:
+        return 'angry';
+      case 1:
+        return 'happy';
+      case 2:
+        return 'neutral';
+      case 3:
+        return 'sad';
+      default:
+        return 'neutral';
+    }
   }
 
   Future<void> _fetchRecommendations() async {
@@ -225,16 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const EmotionCard(emotion: 'anger'),
-                  const SizedBox(height: 20),
-                  Text('Tuned for you', style: AppTextStyle.headline1),
-                  const SizedBox(height: 12),
-                  _isLoading
-                      ? _buildShimmerCards()
-                      : trackData.isEmpty
-                          ? const Center(
-                              child: Text('Unsuccessful in obtaining data'))
-                          : _buildTrackCards(context),
+                  EmotionCard(emotion: _lastHistoryExpression ?? 'neutral'),
                   const SizedBox(height: 20),
                   Text('Playlist for you', style: AppTextStyle.headline1),
                   const SizedBox(height: 12),
@@ -243,6 +308,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       : playlistData.isEmpty
                           ? _buildShimmerCards()
                           : _buildPlaylistCards(context),
+                  Text('Maybe you like', style: AppTextStyle.headline1),
+                  const SizedBox(height: 12),
+                  _isLoading
+                      ? _buildShimmerCards()
+                      : trackData.isEmpty
+                          ? const Center(
+                              child: Text('Unsuccessful in obtaining data'))
+                          : _buildTrackCards(context),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

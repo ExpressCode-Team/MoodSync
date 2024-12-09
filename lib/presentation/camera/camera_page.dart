@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:mood_sync/core/config/assets/app_images.dart';
@@ -19,29 +20,34 @@ class CameraPage extends StatefulWidget {
 
 class _CameraPageState extends State<CameraPage> {
   bool _isLoading = false; // Untuk kontrol modal loading
-  // URL API
-  final String apiUrl = "${EnvConfig.VPS_URL}predict/ml/";
+  final String baseUrlLaravel = EnvConfig.BASE_URL_LARAVEL;
+  final String baseUrl = EnvConfig.BASE_URL;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  late String apiUrl;
+  late String storeDataUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    // URL API
+    apiUrl = "$baseUrl/predict/ml/";
+    // Sesuaikan api
+    storeDataUrl = "$baseUrlLaravel/api/history-expressions";
+    print('baseURLLaravel : $baseUrlLaravel');
+    print('baseURL : $baseUrl');
+  }
 
   // Simulasi request API untuk mendapatkan emosi
   Future<Map<String, dynamic>> _simulateEmotionRequest() async {
-    await Future.delayed(const Duration(seconds: 2)); // Simulasi delay request
-
-    // Simulasi hasil response dari API
+    await Future.delayed(const Duration(seconds: 2)); // Simulated request delay
     List<String> emotions = ["happy", "sad", "angry", "neutral"];
     String simulatedEmotion = emotions[
         (emotions.length * (DateTime.now().millisecondsSinceEpoch % 100) / 100)
             .floor()];
-
-    // Simulasi prediksi
-    List<int> predictions = [
-      1,
-      2,
-      3
-    ]; // Misalnya prediksi ini adalah ID untuk suatu emosi
-
+    List<int> predictions = [1, 2, 3]; // Dummy prediction list
     return {
       "predict": predictions,
-      "label": simulatedEmotion, // Label emosi yang diterima
+      "label": simulatedEmotion,
     };
   }
 
@@ -97,29 +103,29 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   // aseli
-  Future<void> _onCapture(File imageFile) async {
-    setState(() {
-      _isLoading = true;
-    });
+  // Future<void> _onCapture(File imageFile) async {
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
 
-    try {
-      final result = await _sendImageToApi(imageFile);
-      setState(() {
-        _isLoading = false;
-      });
+  //   try {
+  //     final result = await _sendImageToApi(imageFile);
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
 
-      // Menampilkan hasil API
-      print(result);
-      _showEmotionResult(result["label"]); // Menampilkan label langsung
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+  //     // Menampilkan hasil API
+  //     print(result);
+  //     _showEmotionResult(result["label"]); // Menampilkan label langsung
+  //   } catch (e) {
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
 
-      // Menampilkan error
-      _showErrorDialog("Failed to send image: $e");
-    }
-  }
+  //     // Menampilkan error
+  //     _showErrorDialog("Failed to send image: $e");
+  //   }
+  // }
 
   // simulation
   // Future<void> _onCapture(File imageFile) async {
@@ -148,23 +154,88 @@ class _CameraPageState extends State<CameraPage> {
   //   }
   // }
 
-  // void _showEmotionResult(String label) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (_) => AlertDialog(
-  //       title: const Text("Emotion Result"),
-  //       content: Text("Detected emotion: $label"),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () {
-  //             Navigator.pop(context);
-  //           },
-  //           child: const Text("OK"),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  // simulation
+  Future<void> _onCapture(File imageFile) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Gunakan fungsi simulasi untuk mendapatkan hasil emosi
+      // final result = await _simulateEmotionRequest();
+
+      final result = await _sendImageToApi(imageFile);
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      String token = await _getAccessToken();
+
+      if (result["predict"] != null && result["predict"].isNotEmpty) {
+        int expressionId = _getExpressionId(result["label"]);
+        await _storeDataToApi(token, expressionId);
+      }
+      _showEmotionResult(result["label"]);
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      // Menampilkan error
+      _showErrorDialog("Failed to send image: $e");
+    }
+  }
+
+  Future<String> _getAccessToken() async {
+    try {
+      String? token = await _secureStorage.read(key: 'accessToken');
+      if (token == null) {
+        throw Exception("Access token is not available.");
+      }
+      return token;
+    } catch (e) {
+      throw Exception("Error reading token: $e");
+    }
+  }
+
+  int _getExpressionId(String label) {
+    switch (label.toLowerCase()) {
+      case 'angry':
+        return 0;
+      case 'happy':
+        return 1;
+      case 'neutral':
+        return 2;
+      case 'sad':
+        return 3;
+      default:
+        return 2;
+    }
+  }
+
+  Future<void> _storeDataToApi(String accessToken, int expressionId) async {
+    try {
+      final response = await http.post(
+        Uri.parse(storeDataUrl),
+        headers: {
+          'access_token': accessToken,
+        },
+        body: {
+          'expression_id': expressionId.toString(),
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint("Data stored successfully: ${response.body}");
+      } else {
+        throw Exception(
+            "Failed to store data. Status code: ${response.statusCode}. Response: ${response.body}");
+      }
+    } catch (e) {
+      debugPrint("Error storing data to API: $e");
+    }
+  }
 
   // simulation
   void _showEmotionResult(String label) {
