@@ -17,6 +17,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _secureStorage = const FlutterSecureStorage();
   String userName = 'User'; // Default value
+  String? userProfilePicture; // Nullable to handle empty state
 
   @override
   void initState() {
@@ -44,6 +45,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final data = jsonDecode(response.body);
         setState(() {
           userName = data['display_name'] ?? 'User';
+          userProfilePicture = data['images']?.isNotEmpty == true
+              ? data['images'][0]['url']
+              : null;
         });
       } else {
         throw Exception('Failed to fetch user data: ${response.statusCode}');
@@ -77,12 +81,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(
                         height: 42,
                       ),
-                      const Stack(
+                      Stack(
                         alignment: Alignment.center,
                         children: [
                           CircleAvatar(
                             radius: 60,
-                            backgroundImage: AssetImage(AppImages.happyEmot),
+                            backgroundImage: userProfilePicture != null
+                                ? NetworkImage(userProfilePicture!)
+                                : const AssetImage(AppImages.happyEmot)
+                                    as ImageProvider,
                           ),
                         ],
                       ),

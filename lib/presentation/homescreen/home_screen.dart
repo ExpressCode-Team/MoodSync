@@ -12,6 +12,7 @@ import 'package:mood_sync/core/config/theme/app_colors.dart';
 import 'package:mood_sync/core/config/theme/app_text_style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -108,22 +109,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _fetchRecommendations() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? genresJson = prefs.getString('selectedGenres');
-    List<String> genresList;
-
-    if (genresJson != null) {
-      genresList = List<String>.from(json.decode(genresJson));
-    } else {
-      genresList = ['pop']; // Default genre
-    }
-
-    String genresParam = genresList.join(',');
-    String encodedGenres = Uri.encodeComponent(genresParam);
-
-    print('selectedGenres yang disimpan: $genresList');
-    // print('encodedGenres: $encodedGenres');
-
     String? accessToken = await _secureStorage.read(key: 'accessToken');
     if (accessToken == null) {
       print("Access token tidak ditemukan!");
@@ -136,14 +121,14 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-            'https://api.spotify.com/v1/recommendations?seed_genres=$encodedGenres&limit=10'),
+            'https://api.spotify.com/v1/search?q=track&type=track&include_external=audi'),
         headers: {'Authorization': 'Bearer $accessToken'},
       );
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
-        var tracks = data['tracks'];
-        // print('tracks: $tracks');
+        var tracks =
+            data['tracks']['items']; // Mengambil array items dari response
 
         setState(() {
           trackData = tracks
@@ -259,13 +244,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _openSpotifyTrack(String trackUrl) async {
-    try {
-      // await SpotifySdk.playTrack(trackUrl);
-      print('to Spotify');
-    } catch (e) {
-      print("Gagal membuka Spotify: $e");
-    }
+  void _openSpotifyUrl(String url) {
+    // Implementasikan navigasi ke aplikasi Spotify
+    print('Opening Spotify URL: $url');
+    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -381,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.only(right: 16),
             child: GestureDetector(
               onTap: () {
-                _openSpotifyTrack(song['url']);
+                _openSpotifyUrl(song['url']);
               },
               child: SongCard(
                 title: song['title'],

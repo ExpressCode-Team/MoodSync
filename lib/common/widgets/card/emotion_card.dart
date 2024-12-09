@@ -58,7 +58,7 @@ class EmotionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Your mood \nat the moment',
+                      'Your last emotion',
                       style: AppTextStyle.headline1,
                     ),
                     // const SizedBox(

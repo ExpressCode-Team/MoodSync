@@ -80,7 +80,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     } catch (e) {
       setState(() {
         isLoading = false;
-        errorMessage = e.toString();
+        errorMessage = "No emotion recorded";
       });
     }
   }
@@ -245,19 +245,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 if (isLoading)
                   const Center(child: CircularProgressIndicator())
                 else if (errorMessage.isNotEmpty)
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Error: $errorMessage',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: fetchHistoryExpressions,
-                        child: const Text('Retry'),
-                      ),
-                    ],
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          errorMessage,
+                          style: AppTextStyle.headline2,
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: fetchHistoryExpressions,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   )
                 else
                   // List of RecapEmotionCard

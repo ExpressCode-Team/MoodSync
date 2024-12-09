@@ -166,7 +166,7 @@ class _ChooseGenreState extends State<ChooseGenre> {
       // Log status and response
       print("Request URL: ${response.request?.url}");
       print("Response status: ${response.statusCode}");
-      print("Response body: ${response.body}");
+      // print("Response body: ${response.body}");
 
       // Check if the response is successful
       if (response.statusCode == 200 || response.statusCode == 201) {
