@@ -1,0 +1,10 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+class EnvConfig {
+  static String CLIENT_ID = '';
+  static String CLIENT_SECRET = ''; 
+  static String REDIRECT_URI = '';
+  static String SPOTIFY_GLOBAL_SCOPE = '';
+  static String BASE_URL = 'https://example.com';
+  static String BASE_URL_LARAVEL = 'https://example.com';
+}

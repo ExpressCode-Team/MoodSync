@@ -5,7 +5,6 @@ import 'package:mood_sync/core/config/theme/app_theme.dart';
 import 'package:mood_sync/presentation/router/app_router_configuration.dart';
 
 void main() async {
-  await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
 
