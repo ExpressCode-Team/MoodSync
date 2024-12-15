@@ -1,47 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mood_sync/app/modules/history/views/history_view.dart';
+import 'package:mood_sync/app/modules/home/widgets/bottom_navbar_app.dart';
+import 'package:mood_sync/app/modules/home/widgets/fab_face_reg.dart';
+import 'package:mood_sync/app/modules/homepage/views/homepage_view.dart';
+import 'package:mood_sync/app/modules/profile/views/profile_view.dart';
+import 'package:mood_sync/app/modules/statistic/views/statistic_view.dart';
+import 'package:mood_sync/app/routes/app_pages.dart';
 
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
+  final List<Widget> pages = const [
+    HomepageView(),
+    HistoryView(),
+    StatisticView(),
+    ProfileView(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('HomeView'),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Obx(() {
-              return controller.imageUrl.value.isNotEmpty
-                  ? CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(controller.imageUrl.value),
-                    )
-                  : const CircleAvatar(
-                      radius: 50,
-                      child: Icon(Icons.person),
-                    );
-            }),
-            const SizedBox(height: 10),
-            Obx(() => Text(
-                  controller.displayName.value.isNotEmpty
-                      ? 'Welcome, ${controller.displayName.value}'
-                      : 'Welcome, Guest',
-                  style: const TextStyle(fontSize: 20),
-                )),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: controller.logout,
-              child: const Text('Logout'),
-            ),
-          ],
-        ),
-      ),
+      body: Obx(() => IndexedStack(
+            index: controller.selectedIndex.value,
+            children: pages,
+          )),
+      bottomNavigationBar: Obx(() => BottomNavbarApp(
+            currentIndex: controller.selectedIndex.value,
+            onTap: (index) => controller.changePage(index),
+          )),
+      floatingActionButton: FabFaceReg(onPressed: () {
+        Get.toNamed(Routes.LOGIN);
+      }),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
