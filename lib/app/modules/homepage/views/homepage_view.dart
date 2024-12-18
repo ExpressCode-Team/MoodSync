@@ -199,7 +199,7 @@ class HomepageView extends GetView<HomepageController> {
             children: [
               itemBuilder(context, index), // Item
               if (index < itemCount - 1) // Jika bukan item terakhir
-                const SizedBox(width: 16), // Atur jarak di sini
+                const SizedBox(width: 16), // Atur jarak
             ],
           );
         },

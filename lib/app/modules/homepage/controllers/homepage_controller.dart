@@ -131,24 +131,30 @@ class HomepageController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
 
+      print('playlists homepage: ${response.body}');
+
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
         if (data.containsKey('playlists') &&
             data['playlists']['items'] != null) {
           var playlists = data['playlists']['items'];
-          if (playlists.isNotEmpty) {
-            var validPlaylist = playlists.first;
-            fetchedPlaylists.add({
-              'name': validPlaylist['name'] ?? 'No title',
-              'id': validPlaylist['id'],
-              'description':
-                  validPlaylist['description'] ?? 'No description available',
-              'image': validPlaylist['images']?.isNotEmpty == true
-                  ? validPlaylist['images'][0]['url']
-                  : null,
-              'url': validPlaylist['external_urls']['spotify'] ?? '',
-              'type': 'playlist',
-            });
+
+          for (var playlist in playlists) {
+            if (playlist != null) {
+              // Check if the playlist is not null
+              fetchedPlaylists.add({
+                'name': playlist['name'] ?? 'No title',
+                'id': playlist['id'],
+                'description':
+                    playlist['description'] ?? 'No description available',
+                'image': (playlist['images'] != null &&
+                        playlist['images'].isNotEmpty)
+                    ? playlist['images'][0]['url']
+                    : null,
+                'url': playlist['external_urls']['spotify'] ?? '',
+                'type': 'playlist',
+              });
+            }
           }
         }
       } else {
