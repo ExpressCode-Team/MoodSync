@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../modules/camera/bindings/camera_binding.dart';
+import '../modules/camera/views/camera_view.dart';
 import '../modules/history/bindings/history_binding.dart';
 import '../modules/history/views/history_view.dart';
 import '../modules/home/bindings/home_binding.dart';
@@ -8,6 +10,8 @@ import '../modules/homepage/bindings/homepage_binding.dart';
 import '../modules/homepage/views/homepage_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/playlistDetail/bindings/playlist_detail_binding.dart';
+import '../modules/playlistDetail/views/playlist_detail_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
@@ -25,7 +29,7 @@ class AppPages {
   static final routes = [
     GetPage(
       name: _Paths.HOME,
-      page: () => const HomeView(),
+      page: () => HomeView(),
       binding: HomeBinding(),
     ),
     GetPage(
@@ -55,8 +59,18 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.HISTORY,
-      page: () => const HistoryView(),
+      page: () => HistoryView(),
       binding: HistoryBinding(),
+    ),
+    GetPage(
+      name: _Paths.CAMERA,
+      page: () => const CameraView(),
+      binding: CameraBinding(),
+    ),
+    GetPage(
+      name: _Paths.PLAYLIST_DETAIL,
+      page: () => PlaylistDetailView(playlistId: Get.arguments['playlistId']),
+      binding: PlaylistDetailBinding(),
     ),
   ];
 }

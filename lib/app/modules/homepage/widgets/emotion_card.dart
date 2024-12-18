@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mood_sync/app/core/assets/app_images.dart';
+import 'package:mood_sync/app/core/theme/app_colors.dart';
 import 'package:mood_sync/app/core/theme/app_text_style.dart';
 
 class EmotionCard extends StatelessWidget {
@@ -17,21 +18,54 @@ class EmotionCard extends StatelessWidget {
     String imageAsset;
     String emotionState = capitalize(emotion);
 
+    // Kondisi untuk tampilan "No history expressions found for this user."
+    if (emotion == "No history expressions found for this user.") {
+      backgroundColor = const Color.fromARGB(255, 128, 128, 128);
+      imageAsset = AppImages.calmEmot;
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.20,
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  imageAsset,
+                  height: MediaQuery.of(context).size.height * 0.10,
+                ),
+                Text(
+                  emotion,
+                  style: AppTextStyle.caption1,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Tampilan default untuk emotion lainnya
     switch (emotion.toLowerCase()) {
       case 'happy':
-        backgroundColor = const Color.fromARGB(255, 255, 223, 0);
+        backgroundColor = AppColors.happyBg;
         imageAsset = AppImages.happyEmot;
         break;
       case 'sad':
-        backgroundColor = const Color.fromARGB(255, 40, 40, 255);
+        backgroundColor = AppColors.sadBg;
         imageAsset = AppImages.sadEmot;
         break;
       case 'angry':
-        backgroundColor = const Color.fromARGB(255, 255, 0, 0);
+        backgroundColor = AppColors.angerBg;
         imageAsset = AppImages.angerEmot;
         break;
       default:
-        backgroundColor = const Color.fromARGB(255, 128, 128, 128);
+        backgroundColor = AppColors.calmBg;
         imageAsset = AppImages.calmEmot;
         break;
     }
@@ -61,9 +95,6 @@ class EmotionCard extends StatelessWidget {
                       'Your last emotion',
                       style: AppTextStyle.headline1,
                     ),
-                    // const SizedBox(
-                    //   height: 8,
-                    // ),
                     Text(
                       emotionState,
                       style: AppTextStyle.title1,

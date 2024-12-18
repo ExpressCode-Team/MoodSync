@@ -11,12 +11,12 @@ import 'package:mood_sync/app/routes/app_pages.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
-  const HomeView({super.key});
-  final List<Widget> pages = const [
-    HomepageView(),
+  HomeView({super.key});
+  final List<Widget> pages = [
+    const HomepageView(),
     HistoryView(),
-    StatisticView(),
-    ProfileView(),
+    const StatisticView(),
+    const ProfileView(),
   ];
 
   @override
@@ -31,7 +31,7 @@ class HomeView extends GetView<HomeController> {
             onTap: (index) => controller.changePage(index),
           )),
       floatingActionButton: FabFaceReg(onPressed: () {
-        Get.toNamed(Routes.LOGIN);
+        Get.toNamed(Routes.CAMERA);
       }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );

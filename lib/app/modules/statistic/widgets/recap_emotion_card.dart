@@ -1,67 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mood_sync/app/core/assets/app_images.dart';
+import 'package:mood_sync/app/core/theme/app_colors.dart';
 import 'package:mood_sync/app/core/theme/app_text_style.dart';
 
 class RecapEmotionCard extends StatelessWidget {
   final int expressionId;
-  final String time;
-  final String message;
+  final DateTime dateTime;
 
   const RecapEmotionCard({
     super.key,
     required this.expressionId,
-    required this.time,
-    required this.message,
-    required String emotion,
+    required this.dateTime,
   });
 
   @override
   Widget build(BuildContext context) {
     Color avatarColor;
-    IconData avatarIcon;
+    String avatarImage;
     String emotionLabel;
-    String message;
 
     switch (expressionId) {
       case 1:
-        avatarColor = Colors.yellow;
-        avatarIcon = Icons.sentiment_satisfied;
+        avatarColor = AppColors.happyBg;
+        avatarImage = AppImages.happyEmot;
         emotionLabel = 'Happy';
-        message = 'You’re feeling good! Keep it up!';
         break;
       case 2:
-        avatarColor = Colors.grey;
-        avatarIcon = Icons.sentiment_neutral;
+        avatarColor = AppColors.calmBg;
+        avatarImage = AppImages.calmEmot;
         emotionLabel = 'Neutral';
-        message = 'Just okay. How’s your day going?';
         break;
       case 3:
-        avatarColor = Colors.blue;
-        avatarIcon = Icons.sentiment_dissatisfied;
+        avatarColor = AppColors.sadBg;
+        avatarImage = AppImages.sadEmot;
         emotionLabel = 'Sad';
-        message = 'Feeling low? Take your time';
         break;
       case 0:
       default:
-        avatarColor = Colors.red;
-        avatarIcon = Icons.sentiment_very_dissatisfied;
+        avatarColor = AppColors.angerBg;
+        avatarImage = AppImages.angerEmot;
         emotionLabel = 'Angry';
-        message = 'You’re really upset. Try to relax and calm down.';
         break;
     }
+
+    // Format the date and time for WIB
+    String formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
+    String formattedTime = DateFormat('HH:mm').format(dateTime);
 
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: avatarColor,
-        child: Icon(avatarIcon, color: Colors.white),
+        child: Image.asset(avatarImage),
       ),
-      title: Text(emotionLabel, style: AppTextStyle.caption1),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(emotionLabel, style: AppTextStyle.caption1),
+          Text(formattedDate, style: AppTextStyle.caption1),
+        ],
+      ),
       subtitle: Text(
-        '$time - $message',
+        formattedTime,
         style: const TextStyle(color: Colors.white70),
       ),
-      isThreeLine: true,
-      contentPadding:
-          const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16.0),
       tileColor: Colors.grey[900],
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),

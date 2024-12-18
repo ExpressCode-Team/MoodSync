@@ -11,6 +11,7 @@ class HomepageController extends GetxController {
   var trackData = <Map<String, dynamic>>[].obs;
   var playlistData = <Map<String, dynamic>>[].obs;
   final baseUrl = Constants.BASE_URL_LARAVEL;
+  final accessToken = GetStorage().read('accessToken');
 
   @override
   void onInit() {
@@ -35,6 +36,7 @@ class HomepageController extends GetxController {
   Future<void> fetchLastHistoryExpression() async {
     final String apiUrl = '$baseUrl/api/last-history-expressions';
     String accessToken = GetStorage().read('accessToken');
+    print("accessToken: $accessToken");
 
     print("Requesting last history expression...");
     print("apiUrl $apiUrl");
@@ -55,8 +57,17 @@ class HomepageController extends GetxController {
           final int expressionId = data['expression_id'];
           lastHistoryExpression.value = getExpressionLabel(expressionId);
         }
+      }
+      if (response.statusCode == 404) {
+        final Map<String, dynamic> decodedResponse = json.decode(response.body);
+        if (decodedResponse['message'] ==
+            'No history expressions found for this user.') {
+          lastHistoryExpression.value =
+              'No history expressions found for this user.';
+        }
       } else {
-        print('Failed to fetch data. Status code: ${response.statusCode}');
+        print(
+            'Fetch Last History Failed to fetch data. Status code: ${response.statusCode}');
       }
     } catch (e) {
       print("An error occurred: $e");
@@ -83,7 +94,7 @@ class HomepageController extends GetxController {
 
     final response = await http.get(
       Uri.parse(
-          'https://api.spotify.com/v1/search?q=track&type=track&include_external=audi'),
+          'https://api.spotify.com/v1/search?q=track&type=track&include_external=audio'),
       headers: {'Authorization': 'Bearer $accessToken'},
     );
 
@@ -93,10 +104,12 @@ class HomepageController extends GetxController {
 
       trackData.value = tracks.map<Map<String, dynamic>>((track) {
         return {
+          'id': track['id'],
           'title': track['name'],
           'artist': track['artists'][0]['name'],
           'image': track['album']['images'][0]['url'],
           'url': track['external_urls']['spotify'],
+          'type': 'song',
         };
       }).toList();
     } else {
@@ -134,6 +147,7 @@ class HomepageController extends GetxController {
                   ? validPlaylist['images'][0]['url']
                   : null,
               'url': validPlaylist['external_urls']['spotify'] ?? '',
+              'type': 'playlist',
             });
           }
         }

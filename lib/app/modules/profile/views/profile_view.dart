@@ -20,7 +20,7 @@ class ProfileView extends StatelessWidget {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
-        title: const Text('Profile'),
+        title: Text('Profile', style: AppTextStyle.title1),
       ),
       body: Obx(() {
         // Jika sedang loading, tampilkan shimmer

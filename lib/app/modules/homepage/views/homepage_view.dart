@@ -4,9 +4,10 @@ import 'package:get/get.dart';
 import 'package:mood_sync/app/core/assets/app_vectors.dart';
 import 'package:mood_sync/app/core/theme/app_colors.dart';
 import 'package:mood_sync/app/core/theme/app_text_style.dart';
+import 'package:mood_sync/app/core/utils/functions/open_spotify_url.dart';
 import 'package:mood_sync/app/modules/homepage/widgets/emotion_card.dart';
+import 'package:mood_sync/app/routes/app_pages.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../controllers/homepage_controller.dart';
 
@@ -55,7 +56,8 @@ class HomepageView extends GetView<HomepageController> {
               _buildSectionTitle('Maybe you like'),
               controller.trackData.isEmpty
                   ? _buildNoDataText()
-                  : _buildTrackCards(context, cardWidth, cardHeight),
+                  : _buildTrackCards(
+                      context, cardWidth, cardHeight, controller.accessToken),
               const SizedBox(height: 20),
             ],
           ),
@@ -134,8 +136,8 @@ class HomepageView extends GetView<HomepageController> {
     );
   }
 
-  Widget _buildTrackCards(
-      BuildContext context, double cardWidth, double cardHeight) {
+  Widget _buildTrackCards(BuildContext context, double cardWidth,
+      double cardHeight, String accessToken) {
     return _buildHorizontalList(
       context: context,
       itemCount: controller.trackData.length,
@@ -147,7 +149,7 @@ class HomepageView extends GetView<HomepageController> {
           imageUrl: song['image'],
           width: cardWidth,
           height: cardHeight,
-          onTap: () => _openSpotifyUrl(song['url']),
+          onTap: () => openSpotifyUrl(song, accessToken),
         );
       },
     );
@@ -160,7 +162,8 @@ class HomepageView extends GetView<HomepageController> {
       itemBuilder: (context, index) {
         final playlist = controller.playlistData[index];
         return GestureDetector(
-          onTap: () => Get.toNamed('/playlist/${playlist['id']}'),
+          onTap: () => Get.toNamed(Routes.PLAYLIST_DETAIL,
+              arguments: {"playlistId": playlist['id']}),
           child: Container(
             width: cardWidth,
             height: cardWidth * 1.2 + 50,
@@ -191,7 +194,15 @@ class HomepageView extends GetView<HomepageController> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: itemCount,
-        itemBuilder: itemBuilder,
+        itemBuilder: (context, index) {
+          return Row(
+            children: [
+              itemBuilder(context, index), // Item
+              if (index < itemCount - 1) // Jika bukan item terakhir
+                const SizedBox(width: 16), // Atur jarak di sini
+            ],
+          );
+        },
       ),
     );
   }
@@ -239,11 +250,6 @@ class HomepageView extends GetView<HomepageController> {
       child: Text('Unsuccessful in obtaining data',
           style: TextStyle(color: Colors.red)),
     );
-  }
-
-  void _openSpotifyUrl(String url) {
-    print('Opening Spotify URL: $url');
-    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 }
 

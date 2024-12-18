@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:mood_sync/app/core/consts/constants.dart';
 import 'package:mood_sync/app/modules/login/services/unofficial_spotify_service.dart';
 import 'package:mood_sync/app/routes/app_pages.dart';
 import 'package:spotify_sdk/spotify_sdk.dart';
@@ -13,8 +13,8 @@ class LoginController extends GetxController {
   //TODO: Implement LoginController
   final UnofficialSpotifyService _unofficialSpotifyService =
       UnofficialSpotifyService();
-  final _secureStorage = const FlutterSecureStorage();
   final getStorage = GetStorage();
+  final baseUrl = Constants.BASE_URL_LARAVEL;
 
   RxBool isConnected = false.obs;
   RxBool isLoading = false.obs;
@@ -74,12 +74,9 @@ class LoginController extends GetxController {
     isLoading.value = true;
     try {
       var authentication = await SpotifySdk.getAccessToken(
-        clientId: 'e7c14753755f4e5fb395af3f8e2eb583',
-        redirectUrl: 'moodsync://auth',
-        scope: 'app-remote-control, '
-            'user-read-playback-state, '
-            'user-modify-playback-state, '
-            'user-read-currently-playing',
+        clientId: Constants.CLIENT_ID,
+        redirectUrl: Constants.REDIRECT_URI,
+        scope: Constants.SCOPE,
       );
       accessToken.value = authentication;
       final expirationTimestamp =
@@ -88,7 +85,8 @@ class LoginController extends GetxController {
       getStorage.write('accessToken', accessToken.value);
       getStorage.write('expirationTime', expirationTimestamp);
 
-      _fetchUserData(accessToken.value);
+      await _sendDataToApi();
+      await _fetchUserData(accessToken.value);
     } catch (e) {
       throw Exception('Failed to get access token');
     } finally {
@@ -125,6 +123,32 @@ class LoginController extends GetxController {
       }
     } catch (e) {
       print('Error fetching user data: $e');
+    }
+  }
+
+  Future<void> _sendDataToApi() async {
+    try {
+      if (accessToken.value.isEmpty) {
+        accessToken.value = getStorage.read('accessToken');
+        print("get accessToken to send data: $accessToken");
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/users'),
+        headers: {'access_token': accessToken.value},
+      );
+
+      print("Request URL: ${response.request?.url}");
+      print("Response status: ${response.statusCode}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("Data stored successfully: ${response.body}");
+      } else {
+        throw Exception(
+            "Failed to store data. Status code: ${response.statusCode}. Response: ${response.body}");
+      }
+    } catch (e) {
+      print('Error sending data to API: $e');
     }
   }
 }
