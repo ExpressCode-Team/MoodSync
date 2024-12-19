@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:mood_sync/core/config/theme/app_text_style.dart';
-import 'package:mood_sync/core/config/theme/app_theme.dart';
-import 'package:mood_sync/presentation/router/app_router_configuration.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:mood_sync/app/core/theme/app_theme.dart';
 
-void main() {
+import 'app/routes/app_pages.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
   runApp(const MyApp());
 }
 
@@ -12,12 +16,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppTextStyle.setBaseFontSize(context);
-    return MaterialApp.router(
-      title: 'MoodSync',
-      theme: AppTheme.darkTheme,
+    return GetMaterialApp(
+      title: "MoodSync",
+      initialRoute: AppPages.INITIAL,
+      getPages: AppPages.routes,
       debugShowCheckedModeBanner: false,
-      routerConfig: AppRouter.router,
+      theme: AppTheme.darkTheme,
     );
   }
 }

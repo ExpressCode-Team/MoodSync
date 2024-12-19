@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "MoodSycn",
+            "package_name": "com.example.mood_sync",
+            "sha256_cert_fingerprints": [
+                "16:80:81:F5:AF:74:AD:64:77:E7:F2:79:62:4D:51:B4:CF:B4:E3:59:14:B0:39:6A:A0:DD:96:3E:83:0C:E6:19"
+            ]
+        }
+    }
+]
