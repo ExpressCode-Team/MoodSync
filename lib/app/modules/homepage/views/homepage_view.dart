@@ -4,8 +4,9 @@ import 'package:get/get.dart';
 import 'package:mood_sync/app/core/assets/app_vectors.dart';
 import 'package:mood_sync/app/core/theme/app_colors.dart';
 import 'package:mood_sync/app/core/theme/app_text_style.dart';
-import 'package:mood_sync/app/core/utils/functions/open_spotify_url.dart';
+import 'package:mood_sync/app/global_widgets/playlist_card.dart';
 import 'package:mood_sync/app/modules/homepage/widgets/emotion_card.dart';
+import 'package:mood_sync/app/modules/homepage/widgets/song_card.dart';
 import 'package:mood_sync/app/routes/app_pages.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -44,7 +45,7 @@ class HomepageView extends GetView<HomepageController> {
             padding: const EdgeInsets.fromLTRB(32, 16, 32, 0),
             children: [
               controller.lastHistoryExpression.value.isEmpty
-                  ? _buildEmotionCard(context) // Pass context here
+                  ? _buildEmotionCard(context)
                   : EmotionCard(
                       emotion: controller.lastHistoryExpression.value,
                     ),
@@ -56,8 +57,7 @@ class HomepageView extends GetView<HomepageController> {
               _buildSectionTitle('Maybe you like'),
               controller.trackData.isEmpty
                   ? _buildNoDataText()
-                  : _buildTrackCards(
-                      context, cardWidth, cardHeight, controller.accessToken),
+                  : _buildTrackCards(context, cardWidth, cardHeight),
               const SizedBox(height: 20),
             ],
           ),
@@ -136,26 +136,25 @@ class HomepageView extends GetView<HomepageController> {
     );
   }
 
-  Widget _buildTrackCards(BuildContext context, double cardWidth,
-      double cardHeight, String accessToken) {
+  Widget _buildTrackCards(
+      BuildContext context, double cardWidth, double cardHeight) {
     return _buildHorizontalList(
       context: context,
       itemCount: controller.trackData.length,
       itemBuilder: (context, index) {
-        final song = controller.trackData[index];
+        final track = controller.trackData[index];
         return SongCard(
-          title: song['title'],
-          artist: song['artist'],
-          imageUrl: song['image'],
+          track: track,
           width: cardWidth,
           height: cardHeight,
-          onTap: () => openSpotifyUrl(song, accessToken),
         );
       },
     );
   }
 
   Widget _buildPlaylistCards(BuildContext context, double cardWidth) {
+    print('Jumlah playlist: ${controller.playlistData.length}');
+    print('first data playlist: ${controller.playlistData.first.toString()}');
     return _buildHorizontalList(
       context: context,
       itemCount: controller.playlistData.length,
@@ -163,22 +162,8 @@ class HomepageView extends GetView<HomepageController> {
         final playlist = controller.playlistData[index];
         return GestureDetector(
           onTap: () => Get.toNamed(Routes.PLAYLIST_DETAIL,
-              arguments: {"playlistId": playlist['id']}),
-          child: Container(
-            width: cardWidth,
-            height: cardWidth * 1.2 + 50,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: AppColors.darkBackground,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildPlaylistImage(context, playlist),
-                _buildPlaylistDetails(playlist),
-              ],
-            ),
-          ),
+              arguments: {"playlistId": playlist.id}),
+          child: PlaylistCard(playlist: playlist),
         );
       },
     );
@@ -207,132 +192,10 @@ class HomepageView extends GetView<HomepageController> {
     );
   }
 
-  Widget _buildPlaylistImage(
-      BuildContext context, Map<String, dynamic> playlist) {
-    return Container(
-      width: double.infinity,
-      height: MediaQuery.of(context).size.width * 0.4,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        image: DecorationImage(
-          image: NetworkImage(playlist['image']),
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlaylistDetails(Map<String, dynamic> playlist) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            playlist['name'],
-            style: const TextStyle(
-                fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            playlist['description'] ?? 'No description available',
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildNoDataText() {
     return const Center(
       child: Text('Unsuccessful in obtaining data',
           style: TextStyle(color: Colors.red)),
-    );
-  }
-}
-
-class SongCard extends StatelessWidget {
-  final String title;
-  final String artist;
-  final String imageUrl;
-  final double width;
-  final double height;
-  final VoidCallback onTap;
-
-  const SongCard({
-    super.key,
-    required this.title,
-    required this.artist,
-    required this.imageUrl,
-    required this.width,
-    required this.height,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: AppColors.darkBackground,
-          image: DecorationImage(
-            image: NetworkImage(imageUrl),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: height * 0.3,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.9),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    artist,
-                    style: const TextStyle(fontSize: 12, color: Colors.white70),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

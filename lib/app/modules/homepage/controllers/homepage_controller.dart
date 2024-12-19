@@ -1,17 +1,20 @@
 import 'dart:convert';
 
+import 'package:dartz/dartz.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:mood_sync/app/core/consts/constants.dart';
+import 'package:mood_sync/app/core/error/app_error.dart';
+import 'package:mood_sync/app/data/models/playlist.dart';
+import 'package:mood_sync/app/data/models/track.dart';
 
 class HomepageController extends GetxController {
   var isLoading = true.obs;
   var lastHistoryExpression = ''.obs;
-  var trackData = <Map<String, dynamic>>[].obs;
-  var playlistData = <Map<String, dynamic>>[].obs;
+  var trackData = <Track>[].obs; // Menggunakan model Track
+  var playlistData = <Playlist>[].obs; // Menggunakan model Playlist
   final baseUrl = Constants.BASE_URL_LARAVEL;
-  final accessToken = GetStorage().read('accessToken');
 
   @override
   void onInit() {
@@ -27,27 +30,27 @@ class HomepageController extends GetxController {
         fetchPlaylists(),
         fetchLastHistoryExpression(),
       ]);
-    } on Exception catch (e) {
-      print("error occured when fetching data: $e");
+    } catch (e) {
+      print("Error occurred when fetching data: $e");
+    } finally {
+      isLoading.value = false; // Pastikan loading dinonaktifkan di akhir
     }
-    isLoading.value = false;
   }
 
   Future<void> fetchLastHistoryExpression() async {
     final String apiUrl = '$baseUrl/api/last-history-expressions';
-    String accessToken = GetStorage().read('accessToken');
-    print("accessToken: $accessToken");
+    String? accessToken = GetStorage().read('accessToken');
 
-    print("Requesting last history expression...");
-    print("apiUrl $apiUrl");
+    if (accessToken == null) {
+      print('Access token tidak ditemukan.');
+      return;
+    }
 
     try {
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {'access_token': accessToken},
       );
-
-      print("Request completed. Status: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> decodedResponse = json.decode(response.body);
@@ -57,17 +60,8 @@ class HomepageController extends GetxController {
           final int expressionId = data['expression_id'];
           lastHistoryExpression.value = getExpressionLabel(expressionId);
         }
-      }
-      if (response.statusCode == 404) {
-        final Map<String, dynamic> decodedResponse = json.decode(response.body);
-        if (decodedResponse['message'] ==
-            'No history expressions found for this user.') {
-          lastHistoryExpression.value =
-              'No history expressions found for this user.';
-        }
       } else {
-        print(
-            'Fetch Last History Failed to fetch data. Status code: ${response.statusCode}');
+        print('Fetch Last History Failed. Status code: ${response.statusCode}');
       }
     } catch (e) {
       print("An error occurred: $e");
@@ -92,77 +86,81 @@ class HomepageController extends GetxController {
   Future<void> fetchRecommendations() async {
     String? accessToken = GetStorage().read('accessToken');
 
-    final response = await http.get(
-      Uri.parse(
-          'https://api.spotify.com/v1/search?q=track&type=track&include_external=audio'),
-      headers: {'Authorization': 'Bearer $accessToken'},
-    );
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-      var tracks = data['tracks']['items'];
-
-      trackData.value = tracks.map<Map<String, dynamic>>((track) {
-        return {
-          'id': track['id'],
-          'title': track['name'],
-          'artist': track['artists'][0]['name'],
-          'image': track['album']['images'][0]['url'],
-          'url': track['external_urls']['spotify'],
-          'type': 'song',
-        };
-      }).toList();
-    } else {
-      print('Gagal memuat track: ${response.statusCode}');
+    if (accessToken == null) {
+      print('Access token tidak ditemukan.');
+      return;
     }
-  }
 
-  Future<void> fetchPlaylists() async {
-    String? accessToken = GetStorage().read('accessToken');
-
-    List<Map<String, dynamic>> fetchedPlaylists = [];
-    var genresList = ['pop']; // Default genre
-
-    // Fetch playlists based on genres
-    for (String genre in genresList) {
+    try {
       final response = await http.get(
         Uri.parse(
-            'https://api.spotify.com/v1/search?q=genre%3A$genre&type=playlist&include_external=audio'),
+            'https://api.spotify.com/v1/search?q=track&type=track&include_external=audio'),
         headers: {'Authorization': 'Bearer $accessToken'},
       );
 
-      print('playlists homepage: ${response.body}');
-
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
-        if (data.containsKey('playlists') &&
-            data['playlists']['items'] != null) {
-          var playlists = data['playlists']['items'];
+        var tracks = data['tracks']['items'];
 
-          for (var playlist in playlists) {
-            if (playlist != null) {
-              // Check if the playlist is not null
-              fetchedPlaylists.add({
-                'name': playlist['name'] ?? 'No title',
-                'id': playlist['id'],
-                'description':
-                    playlist['description'] ?? 'No description available',
-                'image': (playlist['images'] != null &&
-                        playlist['images'].isNotEmpty)
-                    ? playlist['images'][0]['url']
-                    : null,
-                'url': playlist['external_urls']['spotify'] ?? '',
-                'type': 'playlist',
-              });
+        trackData.value = tracks.map<Track>((track) {
+          return Track(
+            id: track['id'],
+            title: track['name'],
+            artist: track['artists'][0]['name'],
+            image: track['album']['images'][0]['url'],
+            url: track['external_urls']['spotify'],
+            type: 'song',
+          );
+        }).toList();
+      } else {
+        print('Failed to load tracks: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("An error occurred: $e");
+    }
+  }
+
+  Future<Either<AppError, List<Playlist>>> fetchPlaylists() async {
+    String? accessToken = GetStorage().read('accessToken');
+
+    if (accessToken == null) {
+      return Left(AppError('Access token tidak ditemukan.'));
+    }
+
+    var genresList = ['pop'];
+
+    for (String genre in genresList) {
+      try {
+        final response = await http.get(
+          Uri.parse(
+              'https://api.spotify.com/v1/search?q=genre%3A$genre&type=playlist&include_external=audio'),
+          headers: {'Authorization': 'Bearer $accessToken'},
+        );
+
+        if (response.statusCode == 200) {
+          var data = json.decode(response.body);
+
+          if (data.containsKey('playlists') &&
+              data['playlists']['items'] != null) {
+            var playlists = data['playlists']['items'];
+
+            for (var playlist in playlists) {
+              if (playlist != null) {
+                playlistData.add(
+                    Playlist.fromJson(playlist)); // Menggunakan model Playlist
+              }
             }
           }
+        } else {
+          return Left(AppError(
+              'Failed to load playlists for genre $genre: ${response.statusCode}'));
         }
-      } else {
-        print(
-            'Gagal memuat playlist untuk genre $genre: ${response.statusCode}');
+      } catch (e) {
+        return Left(AppError('An error occurred: $e'));
       }
     }
 
-    playlistData.value = fetchedPlaylists;
+    print('playlist home: ${playlistData.first.toString()}');
+    return Right(playlistData);
   }
 }

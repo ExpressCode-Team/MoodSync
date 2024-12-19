@@ -1,15 +1,19 @@
 import 'dart:convert';
 
+import 'package:dartz/dartz.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:mood_sync/app/core/consts/constants.dart';
+import 'package:mood_sync/app/core/error/app_error.dart';
+import 'package:mood_sync/app/data/models/playlist.dart';
+import 'package:mood_sync/app/data/models/track.dart';
 
 class HistoryController extends GetxController {
   final String accessToken = GetStorage().read('accessToken');
   var isLoading = true.obs;
-  var songHistory = <Map<String, dynamic>>[].obs;
-  var playlistHistory = <Map<String, dynamic>>[].obs;
+  var songHistory = <Track>[].obs;
+  var playlistHistory = <Playlist>[].obs;
 
   final String baseUrl = Constants.BASE_URL_LARAVEL;
 
@@ -19,36 +23,37 @@ class HistoryController extends GetxController {
     fetchHistory();
   }
 
-  Future<Map<String, dynamic>?> fetchTrackData(String recommendationId) async {
+  Future<Either<AppError, Track>> fetchTrackData(
+      String recommendationId) async {
     final response = await http.get(
       Uri.parse('https://api.spotify.com/v1/tracks/$recommendationId'),
       headers: {
         'Authorization': 'Bearer $accessToken',
       },
     );
-    print('recomndation song to fetch: $recommendationId');
 
     if (response.statusCode == 200) {
       var trackData = json.decode(response.body);
-
-      return {
-        'images': trackData['album']['images'].isNotEmpty
-            ? trackData['album']['images'][0]['url']
-            : null,
-        'name': trackData['name'],
-        'artist': trackData['artists'].isNotEmpty
-            ? trackData['artists'][0]['name']
-            : null,
-        'url': trackData['external_urls']['spotify'],
-        'type': 'song',
-      };
+      return Right(
+        Track(
+          id: recommendationId,
+          title: trackData['name'],
+          artist: trackData['artists'].isNotEmpty
+              ? trackData['artists'][0]['name']
+              : 'Unknown Artist',
+          image: trackData['album']['images'].isNotEmpty
+              ? trackData['album']['images'][0]['url']
+              : 'https://via.placeholder.com/150',
+          url: trackData['external_urls']['spotify'],
+          type: 'song',
+        ),
+      );
     } else {
-      print('Failed to fetch track: ${response.statusCode}');
-      return null;
+      return Left(AppError('Failed to fetch track: ${response.statusCode}'));
     }
   }
 
-  Future<Map<String, dynamic>?> fetchPlaylistDataHistory(
+  Future<Either<AppError, Playlist>> fetchPlaylistDataHistory(
       String recommendationId) async {
     final response = await http.get(
       Uri.parse('https://api.spotify.com/v1/playlists/$recommendationId'),
@@ -58,10 +63,10 @@ class HistoryController extends GetxController {
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      var playlistData = json.decode(response.body);
+      return Right(Playlist.fromJson(playlistData));
     } else {
-      print('Failed to fetch playlist: ${response.statusCode}');
-      return null;
+      return Left(AppError('Failed to fetch playlist: ${response.statusCode}'));
     }
   }
 
@@ -93,18 +98,21 @@ class HistoryController extends GetxController {
 
       // Fetch track data for songs
       for (var recommendationId in songIds) {
-        var trackData = await fetchTrackData(recommendationId);
-        if (trackData != null) {
-          songHistory.add(trackData);
-        }
+        final trackDataResult = await fetchTrackData(recommendationId);
+        trackDataResult.fold(
+          (error) => print(error.message),
+          (trackData) => songHistory.add(trackData),
+        );
       }
 
       // Fetch playlist data
       for (var recommendationId in playlistIds) {
-        var playlistData = await fetchPlaylistDataHistory(recommendationId);
-        if (playlistData != null) {
-          playlistHistory.add(playlistData);
-        }
+        final playlistDataResult =
+            await fetchPlaylistDataHistory(recommendationId);
+        playlistDataResult.fold(
+          (error) => print(error.message),
+          (playlistData) => playlistHistory.add(playlistData),
+        );
       }
     } else {
       print('Failed to fetch history: ${response.statusCode}');

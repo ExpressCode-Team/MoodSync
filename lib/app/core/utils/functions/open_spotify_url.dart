@@ -12,7 +12,7 @@ Future<void> openSpotifyUrl(Map<String, dynamic> data, String accessToken,
   const baseUrl = Constants.BASE_URL_LARAVEL;
   print('what openSpotifyUrl get from param: $data');
 
-  _showDataDialog(data);
+  // _showDataDialog(data);
 
   // If saveHistory is true, perform the API request to save the history
   if (saveHistory) {
