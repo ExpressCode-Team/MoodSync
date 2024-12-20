@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mood_sync/app/core/theme/app_text_style.dart';
 import 'package:mood_sync/app/core/utils/functions/open_spotify_url.dart';
+import 'package:mood_sync/app/global_widgets/track_tile.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../controllers/playlist_detail_controller.dart';
@@ -49,8 +50,8 @@ class PlaylistDetailView extends GetView<PlaylistDetailController> {
   Widget _buildPlayButton() {
     return FloatingActionButton(
       onPressed: () {
-        final url = controller.playlistData['external_urls']['spotify'];
-        openSpotifyUrl(controller.playlistData, controller.accessToken);
+        openSpotifyUrl(controller.playlistData, controller.accessToken,
+            opsionalUrl: controller.url);
       },
       backgroundColor: Colors.green,
       child: const Icon(Icons.play_arrow),
@@ -161,37 +162,9 @@ class PlaylistDetailView extends GetView<PlaylistDetailController> {
                             (context, index) {
                               if (index < controller.tracks.length) {
                                 final track = controller.tracks[index];
-                                return ListTile(
-                                  leading: CachedNetworkImage(
-                                    imageUrl: track['image'],
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) =>
-                                        Container(color: Colors.grey),
-                                    errorWidget: (context, url, error) =>
-                                        const Icon(Icons.error,
-                                            color: Colors.red),
-                                  ),
-                                  title: Text(
-                                    track['title'],
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  subtitle: Text(
-                                    track['artist'],
-                                    style:
-                                        const TextStyle(color: Colors.white70),
-                                  ),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.play_arrow,
-                                        color: Colors.green),
-                                    onPressed: () => openSpotifyUrl(
-                                        track, controller.accessToken),
-                                  ),
-                                );
+                                return TrackTile(track: track);
                               } else {
-                                return const SizedBox
-                                    .shrink(); // Return an empty box if index is out of range
+                                return const SizedBox.shrink();
                               }
                             },
                             childCount: controller.tracks.length,

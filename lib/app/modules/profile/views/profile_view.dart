@@ -93,12 +93,6 @@ class _MenuItems extends StatelessWidget {
       child: Column(
         children: [
           _MenuItem(
-            icon: Icons.headset_mic,
-            title: 'Contact Us',
-            onTap: () {},
-          ),
-          _buildDivider(),
-          _MenuItem(
             icon: Icons.info_outline,
             title: 'About Us',
             onTap: () {

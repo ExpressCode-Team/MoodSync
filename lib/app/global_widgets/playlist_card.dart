@@ -11,8 +11,9 @@ class PlaylistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('playlist Home sedang dibuat: ');
+    print('PlaylistCard sedang dibuat untuk playlist: ${playlist.toString()}');
     return Container(
+      width: MediaQuery.of(context).size.width * 0.4,
       decoration: const BoxDecoration(
         boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black26)],
       ),

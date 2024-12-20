@@ -50,8 +50,7 @@ class StatisticView extends GetView<StatisticController> {
                 children: [
                   PieChartWidget(controller: controller),
                   const SizedBox(height: 20),
-                  Text("Mood history does not yet exist",
-                      style: AppTextStyle.headline1),
+                  Text("Mood history", style: AppTextStyle.headline1),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),

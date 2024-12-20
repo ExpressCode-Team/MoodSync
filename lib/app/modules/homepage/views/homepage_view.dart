@@ -154,12 +154,17 @@ class HomepageView extends GetView<HomepageController> {
 
   Widget _buildPlaylistCards(BuildContext context, double cardWidth) {
     print('Jumlah playlist: ${controller.playlistData.length}');
-    print('first data playlist: ${controller.playlistData.first.toString()}');
+    if (controller.playlistData.isNotEmpty) {
+      print('Playlist pertama: ${controller.playlistData.first.toString()}');
+    } else {
+      print('Tidak ada playlist yang ditemukan.');
+    }
     return _buildHorizontalList(
       context: context,
       itemCount: controller.playlistData.length,
       itemBuilder: (context, index) {
         final playlist = controller.playlistData[index];
+        print('Membangun playlist: ${playlist.name}');
         return GestureDetector(
           onTap: () => Get.toNamed(Routes.PLAYLIST_DETAIL,
               arguments: {"playlistId": playlist.id}),

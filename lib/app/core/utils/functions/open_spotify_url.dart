@@ -3,16 +3,18 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:mood_sync/app/core/consts/constants.dart';
+import 'package:mood_sync/app/modules/history/controllers/history_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<void> openSpotifyUrl(Map<String, dynamic> data, String accessToken,
-    {bool saveHistory = true}) async {
+    {String? opsionalUrl, bool saveHistory = true}) async {
   String type = data['type'];
   String recommendationId = data['id'];
   const baseUrl = Constants.BASE_URL_LARAVEL;
-  print('what openSpotifyUrl get from param: $data');
+  print('url openSpotifyUrl: ${data['url']}');
 
-  // _showDataDialog(data);
+  // Gunakan opsionalUrl jika ada, jika tidak gunakan data['url']
+  String spotifyUrl = opsionalUrl ?? data['url'];
 
   // If saveHistory is true, perform the API request to save the history
   if (saveHistory) {
@@ -38,19 +40,18 @@ Future<void> openSpotifyUrl(Map<String, dynamic> data, String accessToken,
     }
   }
 
-  String spotifyUrl = data['url'];
   try {
-    await launchUrl(Uri.parse(spotifyUrl));
+    // Launch the Spotify URL
+    bool launched = await launchUrl(Uri.parse(spotifyUrl));
+    if (launched) {
+      print('Successfully opened Spotify URL.'); // Log successful launch
+      // Fetch history again after successful redirection
+      final HistoryController historyController = Get.find();
+      await historyController.fetchHistory();
+    } else {
+      print('Failed to open Spotify URL.');
+    }
   } catch (e) {
     print('Failed to open Spotify URL: ${e.toString()}');
   }
-}
-
-Future<void> _showDataDialog(Map<String, dynamic> data) async {
-  return Get.defaultDialog(
-    title: 'Debug Data',
-    middleText: data.toString(),
-    onConfirm: () => Get.back(),
-    textConfirm: 'OK',
-  );
 }
