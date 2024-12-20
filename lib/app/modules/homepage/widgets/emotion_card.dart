@@ -18,10 +18,12 @@ class EmotionCard extends StatelessWidget {
     String imageAsset;
     String emotionState = capitalize(emotion);
 
-    // Kondisi untuk tampilan "No history expressions found for this user."
-    if (emotion == "No history expressions found for this user.") {
-      backgroundColor = const Color.fromARGB(255, 128, 128, 128);
+    // Kondisi untuk "No history recorded yet"
+    if (emotion == "No history recorded yet") {
+      backgroundColor =
+          const Color.fromARGB(255, 192, 192, 192); // Warna netral
       imageAsset = AppImages.calmEmot;
+
       return SizedBox(
         height: MediaQuery.of(context).size.height * 0.20,
         child: Container(
@@ -38,6 +40,7 @@ class EmotionCard extends StatelessWidget {
                   imageAsset,
                   height: MediaQuery.of(context).size.height * 0.10,
                 ),
+                const SizedBox(height: 8), // Jarak antar ikon dan teks
                 Text(
                   emotion,
                   style: AppTextStyle.caption1,
@@ -81,13 +84,14 @@ class EmotionCard extends StatelessWidget {
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: backgroundColor, //backgroundColor
+                color: backgroundColor,
                 borderRadius: const BorderRadius.all(Radius.circular(12)),
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.05,
-                    vertical: 16),
+                  horizontal: MediaQuery.of(context).size.width * 0.05,
+                  vertical: 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

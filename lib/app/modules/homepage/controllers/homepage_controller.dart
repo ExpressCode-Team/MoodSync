@@ -139,6 +139,7 @@ class HomepageController extends GetxController {
 
         if (response.statusCode == 200) {
           var data = json.decode(response.body);
+          print('Data playlist: $data');
 
           if (data.containsKey('playlists') &&
               data['playlists']['items'] != null) {

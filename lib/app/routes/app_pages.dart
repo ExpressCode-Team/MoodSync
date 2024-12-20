@@ -14,6 +14,8 @@ import '../modules/playlistDetail/bindings/playlist_detail_binding.dart';
 import '../modules/playlistDetail/views/playlist_detail_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
+import '../modules/recomendation/bindings/recomendation_binding.dart';
+import '../modules/recomendation/views/recomendation_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
 import '../modules/statistic/bindings/statistic_binding.dart';
@@ -71,6 +73,14 @@ class AppPages {
       name: _Paths.PLAYLIST_DETAIL,
       page: () => PlaylistDetailView(playlistId: Get.arguments['playlistId']),
       binding: PlaylistDetailBinding(),
+    ),
+    GetPage(
+      name: _Paths.RECOMENDATION,
+      page: () {
+        final emotion = Get.arguments;
+        return RecomendationView(emotion: emotion);
+      },
+      binding: RecomendationBinding(),
     ),
   ];
 }

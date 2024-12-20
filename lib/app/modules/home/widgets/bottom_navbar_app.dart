@@ -29,7 +29,7 @@ class BottomNavbarApp extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(
-              Icons.search,
+              Icons.ballot,
               color: currentIndex == 1 ? AppColors.primary : Colors.white,
             ),
             onPressed: () => onTap(1),

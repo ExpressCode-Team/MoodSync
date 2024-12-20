@@ -133,7 +133,7 @@ class CameraView extends StatelessWidget {
     controller.isLoading.value = true;
 
     try {
-      final result = await controller.processImage(imageFile, simulate: true);
+      final result = await controller.processImage(imageFile, simulate: false);
       String token = await controller.getAccessToken();
 
       if (result["predict"] != null && result["predict"].isNotEmpty) {
@@ -196,7 +196,7 @@ class CameraView extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                Get.offAllNamed(Routes.HOME);
+                Get.offAllNamed(Routes.RECOMENDATION, arguments: label);
               },
               child: const Text("Next"),
             ),
